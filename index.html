@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="pt-PT" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ateliê da Laurinha | Crochê & Tricô</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Nunito', 'sans-serif'],
+                        display: ['Fredoka', 'sans-serif'],
+                    },
+                    colors: {
+                        atelie: {
+                            pink: '#fca5a5',
+                            light: '#fdf2f8',
+                            blue: '#93c5fd',
+                            green: '#bbf7d0',
+                            yellow: '#fef08a',
+                            dark: '#4c1d95',
+                            text: '#44403c'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .blob-shape {
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+            animation: morph 8s ease-in-out infinite;
+        }
+        @keyframes morph {
+            0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+            34% { border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%; }
+            67% { border-radius: 100% 60% 60% 100% / 100% 100% 60% 60%; }
+        }
+    </style>
+</head>
+<body class="font-sans bg-atelie-light text-atelie-text antialiased">
+
+    <!-- Navbar -->
+    <nav class="fixed w-full z-50 top-0 transition-all duration-300" id="navbar">
+        <div class="absolute inset-0 bg-white/80 backdrop-blur-md shadow-sm border-b border-pink-100"></div>
+        <div class="max-w-6xl mx-auto px-4 relative">
+            <div class="flex justify-between items-center h-20">
+                <a href="#" class="flex items-center gap-2">
+                    <i data-lucide="scissors" class="text-rose-400 w-8 h-8"></i>
+                    <span class="font-display font-semibold text-2xl text-rose-500 tracking-wide">Ateliê da Laurinha</span>
+                </a>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex space-x-8">
+                    <a href="#inicio" class="font-semibold text-gray-600 hover:text-rose-500 transition-colors">Início</a>
+                    <a href="#produtos" class="font-semibold text-gray-600 hover:text-rose-500 transition-colors">O que fazemos</a>
+                    <a href="#encomendar" class="font-semibold text-gray-600 hover:text-rose-500 transition-colors">Como Encomendar</a>
+                </div>
+
+                <div class="hidden md:block">
+                    <a href="#contato" class="bg-rose-400 hover:bg-rose-500 text-white px-6 py-2 rounded-full font-bold shadow-md shadow-rose-200 transition-transform transform hover:scale-105">
+                        Falar com a Laurinha
+                    </a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" class="md:hidden text-gray-600 hover:text-rose-500 focus:outline-none">
+                    <i data-lucide="menu" class="w-8 h-8"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Panel -->
+        <div id="mobile-menu" class="hidden md:hidden absolute w-full bg-white shadow-xl border-b border-pink-100">
+            <div class="flex flex-col px-4 pt-2 pb-6 space-y-4">
+                <a href="#inicio" class="font-semibold text-gray-600 hover:text-rose-500">Início</a>
+                <a href="#produtos" class="font-semibold text-gray-600 hover:text-rose-500">O que fazemos</a>
+                <a href="#encomendar" class="font-semibold text-gray-600 hover:text-rose-500">Como Encomendar</a>
+                <a href="#contato" class="bg-rose-400 text-white px-4 py-2 rounded-full font-bold text-center mt-4">Falar com a Laurinha</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="inicio" class="pt-32 pb-20 px-4 min-h-[90vh] flex items-center relative overflow-hidden">
+        <!-- Decorative blobs -->
+        <div class="absolute top-20 left-10 w-64 h-64 bg-atelie-blue/30 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
+        <div class="absolute top-40 right-10 w-72 h-72 bg-atelie-pink/30 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
+        <div class="absolute -bottom-8 left-40 w-72 h-72 bg-atelie-yellow/30 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
+
+        <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center relative z-10">
+            <div class="text-center md:text-left">
+                <div class="inline-flex items-center gap-2 bg-rose-100 text-rose-600 px-4 py-2 rounded-full text-sm font-bold mb-6">
+                    <i data-lucide="heart" class="w-4 h-4 fill-rose-500"></i>
+                    Feito à mão, com muito amor
+                </div>
+                <h1 class="font-display text-5xl md:text-6xl font-bold text-gray-800 leading-tight mb-6">
+                    Arte em <span class="text-rose-400">Crochê</span> e <span class="text-teal-400">Tricô</span> sob encomenda!
+                </h1>
+                <p class="text-xl text-gray-600 mb-8 leading-relaxed">
+                    Transformamos fios em peças únicas e personalizadas. Desde tiaras fofinhas a tops estilosos, tudo feito exatamente como sonhaste.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                    <a href="#produtos" class="bg-rose-400 hover:bg-rose-500 text-white px-8 py-4 rounded-full font-bold text-lg shadow-lg shadow-rose-200 transition-transform transform hover:scale-105 text-center">
+                        Ver Criações
+                    </a>
+                    <a href="#contato" class="bg-white border-2 border-rose-200 text-rose-500 hover:bg-rose-50 px-8 py-4 rounded-full font-bold text-lg transition-colors text-center">
+                        Fazer Encomenda
+                    </a>
+                </div>
+            </div>
+            
+            <div class="relative flex justify-center items-center">
+                <!-- Hero Image Placeholder / Illustration -->
+                <div class="w-80 h-80 md:w-96 md:h-96 bg-gradient-to-tr from-rose-200 to-teal-100 blob-shape relative shadow-2xl flex items-center justify-center border-4 border-white">
+                    <div class="absolute -top-4 -right-4 bg-white p-4 rounded-full shadow-lg transform rotate-12">
+                        <i data-lucide="sparkles" class="w-8 h-8 text-yellow-400"></i>
+                    </div>
+                    <div class="absolute -bottom-6 -left-6 bg-white p-4 rounded-full shadow-lg transform -rotate-12">
+                        <i data-lucide="palette" class="w-8 h-8 text-teal-400"></i>
+                    </div>
+                    <!-- Central Icon representing handmade -->
+                    <i data-lucide="shirt" class="w-32 h-32 text-rose-400 opacity-80"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section id="produtos" class="py-20 bg-white relative">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="font-display text-4xl font-bold text-gray-800 mb-4">O que a Laurinha faz?</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">Cada ponto é pensado com carinho. Escolhe a categoria e vem personalizar a tua peça de sonho!</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                
+                <!-- Product Card 1 -->
+                <div class="bg-rose-50 rounded-3xl p-6 text-center hover:shadow-xl transition-shadow border-2 border-transparent hover:border-rose-200 group">
+                    <div class="w-24 h-24 mx-auto bg-white rounded-full flex items-center justify-center shadow-sm mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i data-lucide="crown" class="w-10 h-10 text-rose-400"></i>
+                    </div>
+                    <h3 class="font-display text-2xl font-bold text-gray-800 mb-3">Tiaras e Faixas</h3>
+                    <p class="text-gray-600 mb-6">Acessórios fofos e confortáveis para o cabelo. Fazemos em todas as cores e tamanhos!</p>
+                </div>
+
+                <!-- Product Card 2 -->
+                <div class="bg-teal-50 rounded-3xl p-6 text-center hover:shadow-xl transition-shadow border-2 border-transparent hover:border-teal-200 group">
+                    <div class="w-24 h-24 mx-auto bg-white rounded-full flex items-center justify-center shadow-sm mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i data-lucide="shirt" class="w-10 h-10 text-teal-400"></i>
+                    </div>
+                    <h3 class="font-display text-2xl font-bold text-gray-800 mb-3">Tops e Croppeds</h3>
+                    <p class="text-gray-600 mb-6">Perfeitos para os dias de sol! Modelos exclusivos, biquínis e tops ajustados ao teu corpo.</p>
+                </div>
+
+                <!-- Product Card 3 -->
+                <div class="bg-blue-50 rounded-3xl p-6 text-center hover:shadow-xl transition-shadow border-2 border-transparent hover:border-blue-200 group">
+                    <div class="w-24 h-24 mx-auto bg-white rounded-full flex items-center justify-center shadow-sm mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i data-lucide="snowflake" class="w-10 h-10 text-blue-400"></i>
+                    </div>
+                    <h3 class="font-display text-2xl font-bold text-gray-800 mb-3">Toucas e Gorros</h3>
+                    <p class="text-gray-600 mb-6">Fica quentinha com muito estilo! Tricô e crochê grossinho para os dias mais frios.</p>
+                </div>
+
+                <!-- Product Card 4 -->
+                <div class="bg-yellow-50 rounded-3xl p-6 text-center hover:shadow-xl transition-shadow border-2 border-transparent hover:border-yellow-200 group">
+                    <div class="w-24 h-24 mx-auto bg-white rounded-full flex items-center justify-center shadow-sm mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i data-lucide="shopping-bag" class="w-10 h-10 text-yellow-500"></i>
+                    </div>
+                    <h3 class="font-display text-2xl font-bold text-gray-800 mb-3">Bolsinhas</h3>
+                    <p class="text-gray-600 mb-6">Nécessaires, bolsas de passeio e porta-telemóveis. Práticas, coloridas e super charmosas.</p>
+                </div>
+
+                <!-- Product Card 5 -->
+                <div class="bg-purple-50 rounded-3xl p-6 text-center hover:shadow-xl transition-shadow border-2 border-transparent hover:border-purple-200 group sm:col-span-2 lg:col-span-2">
+                    <div class="w-24 h-24 mx-auto bg-white rounded-full flex items-center justify-center shadow-sm mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i data-lucide="gift" class="w-10 h-10 text-purple-400"></i>
+                    </div>
+                    <h3 class="font-display text-2xl font-bold text-gray-800 mb-3">Itens Personalizados</h3>
+                    <p class="text-gray-600 mb-6 max-w-md mx-auto">Tens uma ideia maluca? Um amigurumi (ursinho), uma capa para o portátil ou um presente especial? Nós fazemos acontecer!</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- How it works -->
+    <section id="encomendar" class="py-20 bg-rose-400 text-white relative overflow-hidden">
+        <!-- Overlay pattern -->
+        <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 24px 24px;"></div>
+        
+        <div class="max-w-6xl mx-auto px-4 relative z-10">
+            <div class="text-center mb-16">
+                <h2 class="font-display text-4xl font-bold mb-4 text-white">Como fazer uma encomenda?</h2>
+                <p class="text-rose-100 text-lg">O processo é super simples e feito à tua medida.</p>
+            </div>
+
+            <div class="grid md:grid-cols-4 gap-8 text-center">
+                <div class="bg-white/10 backdrop-blur-sm p-6 rounded-2xl">
+                    <div class="w-16 h-16 bg-white text-rose-500 rounded-full flex items-center justify-center mx-auto text-2xl font-bold font-display mb-4 shadow-lg">1</div>
+                    <h4 class="font-bold text-xl mb-2">A Ideia</h4>
+                    <p class="text-rose-50 text-sm">Pensa no que queres ou escolhe um dos nossos modelos.</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm p-6 rounded-2xl mt-0 md:mt-8">
+                    <div class="w-16 h-16 bg-white text-rose-500 rounded-full flex items-center justify-center mx-auto text-2xl font-bold font-display mb-4 shadow-lg">2</div>
+                    <h4 class="font-bold text-xl mb-2">Personaliza</h4>
+                    <p class="text-rose-50 text-sm">Escolhe as cores, os fios e tira as medidas se for preciso.</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm p-6 rounded-2xl">
+                    <div class="w-16 h-16 bg-white text-rose-500 rounded-full flex items-center justify-center mx-auto text-2xl font-bold font-display mb-4 shadow-lg">3</div>
+                    <h4 class="font-bold text-xl mb-2">Contacta</h4>
+                    <p class="text-rose-50 text-sm">Manda-nos mensagem no WhatsApp ou Instagram.</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm p-6 rounded-2xl mt-0 md:mt-8">
+                    <div class="w-16 h-16 bg-white text-rose-500 rounded-full flex items-center justify-center mx-auto text-2xl font-bold font-display mb-4 shadow-lg">4</div>
+                    <h4 class="font-bold text-xl mb-2">Magia!</h4>
+                    <p class="text-rose-50 text-sm">A Laurinha deita mãos à obra e a tua peça ganha vida.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contato" class="py-20 bg-atelie-light">
+        <div class="max-w-4xl mx-auto px-4">
+            <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-rose-50 flex flex-col md:flex-row">
+                
+                <div class="bg-rose-50 p-10 md:w-2/5 flex flex-col justify-center items-center text-center">
+                    <div class="w-32 h-32 bg-white rounded-full p-2 shadow-inner mb-6">
+                        <img src="https://ui-avatars.com/api/?name=Laurinha&background=fca5a5&color=fff&size=128&rounded=true" alt="Avatar Laurinha" class="w-full h-full rounded-full">
+                    </div>
+                    <h3 class="font-display text-2xl font-bold text-gray-800 mb-2">Olá, sou a Laurinha!</h3>
+                    <p class="text-gray-600 mb-6">Adoro criar peças únicas com as minhas próprias mãos. Vamos criar algo lindo juntas?</p>
+                    
+                    <div class="flex gap-4">
+                        <a href="#" class="w-12 h-12 bg-white text-rose-500 rounded-full flex items-center justify-center shadow hover:bg-rose-500 hover:text-white transition-colors">
+                            <i data-lucide="instagram" class="w-6 h-6"></i>
+                        </a>
+                        <a href="#" class="w-12 h-12 bg-white text-green-500 rounded-full flex items-center justify-center shadow hover:bg-green-500 hover:text-white transition-colors">
+                            <i data-lucide="message-circle" class="w-6 h-6"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="p-10 md:w-3/5">
+                    <h3 class="font-display text-3xl font-bold text-gray-800 mb-6">Manda-me uma mensagem</h3>
+                    <form id="contactForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-600 mb-1">O teu Nome</label>
+                            <input type="text" placeholder="Como te chamas?" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-transparent transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-600 mb-1">O que gostarias de encomendar?</label>
+                            <select class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-transparent transition-all bg-white">
+                                <option>Uma Tiara linda</option>
+                                <option>Um Top/Cropped</option>
+                                <option>Uma Touca quentinha</option>
+                                <option>Uma Bolsinha</option>
+                                <option>Outra ideia personalizada</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-600 mb-1">Mensagem / Detalhes</label>
+                            <textarea rows="4" placeholder="Conta-me as cores que gostas, tamanhos, etc..." class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-transparent transition-all"></textarea>
+                        </div>
+                        <button type="button" onclick="submitMessage()" class="w-full bg-rose-400 hover:bg-rose-500 text-white font-bold py-4 rounded-xl transition-colors shadow-md flex justify-center items-center gap-2">
+                            <i data-lucide="send" class="w-5 h-5"></i>
+                            Enviar Pedido
+                        </button>
+                    </form>
+                    
+                    <!-- Success Message (Hidden by default) -->
+                    <div id="successMsg" class="hidden mt-4 p-4 bg-green-100 text-green-700 rounded-xl flex items-center gap-2">
+                        <i data-lucide="check-circle" class="w-5 h-5"></i>
+                        <span>Mensagem enviada com sucesso! A Laurinha responde já a seguir.</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-white pt-16 pb-8 border-t border-rose-100">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex items-center gap-2">
+                <i data-lucide="scissors" class="text-rose-400 w-6 h-6"></i>
+                <span class="font-display font-semibold text-xl text-gray-800">Ateliê da Laurinha</span>
+            </div>
+            
+            <p class="text-gray-500 text-sm text-center md:text-left">
+                &copy; 2026 Ateliê da Laurinha. Todos os direitos reservados. Feito com <i data-lucide="heart" class="w-4 h-4 inline text-rose-500 fill-rose-500"></i> e muitos fios.
+            </p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Inicia os Ícones Lucide
+        lucide.createIcons();
+
+        // Menu Mobile Toggle
+        const btn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('mobile-menu');
+
+        btn.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+        });
+
+        // Fechar menu mobile ao clicar num link
+        const mobileLinks = menu.querySelectorAll('a');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                menu.classList.add('hidden');
+            });
+        });
+
+        // Simular envio de formulário
+        function submitMessage() {
+            const btn = document.querySelector('#contactForm button');
+            const msg = document.getElementById('successMsg');
+            
+            // Efeito visual no botão
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i data-lucide="loader" class="w-5 h-5 animate-spin"></i> A enviar...';
+            lucide.createIcons();
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                document.getElementById('contactForm').reset();
+                msg.classList.remove('hidden');
+                lucide.createIcons();
+                
+                // Esconder mensagem depois de 5 segundos
+                setTimeout(() => {
+                    msg.classList.add('hidden');
+                }, 5000);
+                
+            }, 1500);
+        }
+
+        // Adicionar sombra à Navbar ao fazer scroll
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 20) {
+                nav.classList.add('shadow-md');
+            } else {
+                nav.classList.remove('shadow-md');
+            }
+        });
+    </script>
+</body>
+</html>
