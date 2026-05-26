@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Nunito', sans-serif;
+  --font-display: 'Fredoka', sans-serif;
+  
+  --color-atelie-pink: #fca5a5;
+  --color-atelie-light: #fdf2f8;
+  --color-atelie-blue: #93c5fd;
+  --color-atelie-green: #bbf7d0;
+  --color-atelie-yellow: #fef08a;
+  --color-atelie-dark: #4c1d95;
+  --color-atelie-text: #44403c;
+  
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+  }
+}
+
+@layer utilities {
+    .blob-shape {
+        border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+        animation: morph 8s ease-in-out infinite;
+    }
+    
+    .typing-cursor::after {
+        content: '|';
+        animation: blink 1s step-start infinite;
+    }
+}
+
+@keyframes morph {
+    0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+    34% { border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%; }
+    67% { border-radius: 100% 60% 60% 100% / 100% 100% 60% 60%; }
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}
+
+html {
+    scroll-behavior: smooth;
+}

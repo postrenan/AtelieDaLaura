@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="pt-PT" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ateliê da Laurinha | Crochê & Tricô</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- AOS Animation Library CSS -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Nunito', 'sans-serif'],
+                        display: ['Fredoka', 'sans-serif'],
+                    },
+                    colors: {
+                        atelie: {
+                            pink: '#fca5a5',
+                            light: '#fdf2f8',
+                            blue: '#93c5fd',
+                            green: '#bbf7d0',
+                            yellow: '#fef08a',
+                            dark: '#4c1d95',
+                            text: '#44403c'
+                        }
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .blob-shape {
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+            animation: morph 8s ease-in-out infinite;
+        }
+        @keyframes morph {
+            0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+            34% { border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%; }
+            67% { border-radius: 100% 60% 60% 100% / 100% 100% 60% 60%; }
+        }
+        
+        /* Cursor piscante para as frases que trocam */
+        .typing-cursor::after {
+            content: '|';
+            animation: blink 1s step-start infinite;
+        }
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body class="font-sans bg-atelie-light text-atelie-text antialiased overflow-x-hidden">
+
+    <!-- Variável de configuração do WhatsApp -->
+    <script>
+        // SUBSTITUIR AQUI PELO NÚMERO DE WHATSAPP DA LAURINHA (código do país + DDD + número)
+        // Exemplo: 5511999999999
+        const WHATSAPP_NUMBER = "555596992684"; 
+    </script>
+
+    <!-- Navbar -->
+    <nav class="fixed w-full z-50 top-0 transition-all duration-300" id="navbar">
+        <div class="absolute inset-0 bg-white/80 backdrop-blur-md shadow-sm border-b border-pink-100"></div>
+        <div class="max-w-6xl mx-auto px-4 relative">
+            <div class="flex justify-between items-center h-20">
+                <a href="#" class="flex items-center gap-2" data-aos="fade-right">
+                    <i data-lucide="scissors" class="text-rose-400 w-8 h-8"></i>
+                    <span class="font-display font-semibold text-2xl text-rose-500 tracking-wide">Ateliê da Laurinha</span>
+                </a>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex space-x-8" data-aos="fade-down" data-aos-delay="100">
+                    <a href="#inicio" class="font-semibold text-gray-600 hover:text-rose-500 transition-colors">Início</a>
+                    <a href="#produtos" class="font-semibold text-gray-600 hover:text-rose-500 transition-colors">Criações</a>
+                    <a href="#datas-especiais" class="font-semibold text-rose-500 hover:text-rose-600 transition-colors flex items-center gap-1">
+                        <i data-lucide="heart" class="w-4 h-4 fill-rose-500"></i> Presentes
+                    </a>
+                </div>
+
+                <div class="hidden md:block" data-aos="fade-left" data-aos-delay="200">
+                    <button onclick="openWhatsApp('Olá Laurinha! Gostaria de fazer uma encomenda.')" class="bg-rose-400 hover:bg-rose-500 text-white px-6 py-2 rounded-full font-bold shadow-md shadow-rose-200 transition-transform transform hover:scale-105 flex items-center gap-2">
+                        <i data-lucide="message-circle" class="w-5 h-5"></i>
+                        WhatsApp
+                    </button>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" class="md:hidden text-gray-600 hover:text-rose-500 focus:outline-none">
+                    <i data-lucide="menu" class="w-8 h-8"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Panel -->
+        <div id="mobile-menu" class="hidden md:hidden absolute w-full bg-white shadow-xl border-b border-pink-100">
+            <div class="flex flex-col px-4 pt-2 pb-6 space-y-4">
+                <a href="#inicio" class="font-semibold text-gray-600 hover:text-rose-500">Início</a>
+                <a href="#produtos" class="font-semibold text-gray-600 hover:text-rose-500">Criações</a>
+                <a href="#datas-especiais" class="font-semibold text-rose-500 flex items-center gap-2">
+                    <i data-lucide="heart" class="w-4 h-4 fill-rose-500"></i> Presentes Especiais
+                </a>
+                <button onclick="openWhatsApp('Olá Laurinha! Gostaria de fazer uma encomenda.')" class="bg-rose-400 text-white px-4 py-2 rounded-full font-bold text-center mt-4 flex justify-center items-center gap-2">
+                    <i data-lucide="message-circle" class="w-5 h-5"></i>
+                    Chamar no WhatsApp
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="inicio" class="pt-32 pb-20 px-4 min-h-[90vh] flex items-center relative overflow-hidden">
+        <!-- Decorative blobs -->
+        <div class="absolute top-20 left-10 w-64 h-64 bg-atelie-blue/30 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
+        <div class="absolute top-40 right-10 w-72 h-72 bg-atelie-pink/30 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
+        <div class="absolute -bottom-8 left-40 w-72 h-72 bg-atelie-yellow/30 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
+
+        <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center relative z-10">
+            <div class="text-center md:text-left" data-aos="fade-up">
+                <div class="inline-flex items-center gap-2 bg-rose-100 text-rose-600 px-4 py-2 rounded-full text-sm font-bold mb-6">
+                    <i data-lucide="stars" class="w-4 h-4 text-rose-500"></i>
+                    Feito à mão, com muito amor
+                </div>
+                
+                <h1 class="font-display text-5xl md:text-6xl font-bold text-gray-800 leading-tight mb-4">
+                    Arte em <span class="text-rose-400">Crochê</span> e <span class="text-teal-400">Tricô</span>
+                </h1>
+                
+                <!-- Frases animadas que trocam -->
+                <div class="h-12 md:h-16 mb-6">
+                    <h2 class="font-display text-3xl md:text-4xl font-semibold text-rose-500">
+                        Crochê é <span id="typing-text" class="text-purple-500 typing-cursor"></span>
+                    </h2>
+                </div>
+
+                <p class="text-xl text-gray-600 mb-8 leading-relaxed">
+                    Transformamos fios em peças únicas e personalizadas. Exatamente como sonhaste, direto para ti!
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                    <button onclick="openWhatsApp('Oi Laurinha! Vim pelo site e quero fazer uma encomenda incrível!')" class="bg-rose-400 hover:bg-rose-500 text-white px-8 py-4 rounded-full font-bold text-lg shadow-lg shadow-rose-200 transition-transform transform hover:scale-105 text-center flex justify-center items-center gap-2">
+                        <i data-lucide="message-circle" class="w-6 h-6"></i>
+                        Encomendar no Whats
+                    </button>
+                    <a href="#produtos" class="bg-white border-2 border-rose-200 text-rose-500 hover:bg-rose-50 px-8 py-4 rounded-full font-bold text-lg transition-colors text-center">
+                        Ver Criações
+                    </a>
+                </div>
+            </div>
+            
+            <div class="relative flex justify-center items-center" data-aos="zoom-in" data-aos-delay="200">
+                <div class="animate-float">
+                    <div class="w-80 h-80 md:w-96 md:h-96 bg-gradient-to-tr from-rose-200 to-teal-100 blob-shape relative shadow-2xl flex items-center justify-center border-4 border-white">
+                        <div class="absolute -top-4 -right-4 bg-white p-4 rounded-full shadow-lg transform rotate-12 animate-pulse-slow">
+                            <i data-lucide="sparkles" class="w-8 h-8 text-yellow-400"></i>
+                        </div>
+                        <div class="absolute -bottom-6 -left-6 bg-white p-4 rounded-full shadow-lg transform -rotate-12 hover:rotate-0 transition-transform duration-300">
+                            <i data-lucide="heart" class="w-8 h-8 text-rose-400 fill-rose-400"></i>
+                        </div>
+                        <!-- Central Icon -->
+                        <i data-lucide="shirt" class="w-32 h-32 text-rose-400 opacity-80"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Special Dates Section (Dia dos Namorados, etc) -->
+    <section id="datas-especiais" class="py-16 bg-gradient-to-b from-rose-50 to-white relative">
+        <div class="max-w-5xl mx-auto px-4">
+            <div class="bg-rose-400 rounded-[3rem] p-8 md:p-12 text-white relative overflow-hidden shadow-2xl" data-aos="flip-up">
+                
+                <!-- Background patterns for special section -->
+                <i data-lucide="heart" class="absolute -top-10 -right-10 w-40 h-40 text-rose-500 opacity-20 fill-rose-500 transform rotate-12"></i>
+                <i data-lucide="gift" class="absolute -bottom-5 -left-5 w-32 h-32 text-rose-300 opacity-30 transform -rotate-12"></i>
+                
+                <div class="relative z-10 flex flex-col md:flex-row items-center gap-8">
+                    <div class="md:w-2/3 text-center md:text-left">
+                        <div class="inline-block bg-white/20 backdrop-blur-sm rounded-full px-4 py-1 mb-4 border border-white/30 text-sm font-semibold uppercase tracking-wider">
+                            Datas Especiais
+                        </div>
+                        <h2 class="font-display text-4xl md:text-5xl font-bold mb-4">Presenteie com Afeto!</h2>
+                        <p class="text-rose-100 text-lg mb-6 leading-relaxed">
+                            Dia dos Namorados chegando? Aniversário de alguém especial? 
+                            Surpreenda com uma peça única, feita à mão. Criamos amigurumis, corações em crochê, e kits personalizados para emocionar quem você ama.
+                        </p>
+                        <button onclick="openWhatsApp('Olá Laurinha! Preciso de um presente especial/personalizado para uma data comemorativa!')" class="bg-white text-rose-500 hover:bg-rose-50 px-8 py-3 rounded-full font-bold text-lg shadow-lg transition-transform transform hover:scale-105 inline-flex items-center gap-2">
+                            <i data-lucide="gift" class="w-5 h-5"></i>
+                            Quero um Presente Único
+                        </button>
+                    </div>
+                    <div class="md:w-1/3 flex justify-center">
+                        <div class="w-48 h-48 bg-white/20 backdrop-blur-md rounded-full border-4 border-white/50 flex items-center justify-center animate-pulse-slow">
+                            <i data-lucide="heart-handshake" class="w-24 h-24 text-white"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section id="produtos" class="py-20 bg-white relative">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="font-display text-4xl font-bold text-gray-800 mb-4">O que a Laurinha faz?</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">Tudo o que a tua imaginação permitir! Escolhe o teu favorito.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                
+                <div class="bg-rose-50 rounded-3xl p-6 text-center hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-rose-200 hover:-translate-y-2 cursor-pointer" data-aos="fade-up" data-aos-delay="100" onclick="openWhatsApp('Oi Laurinha! Gostei muito das Tiaras/Faixas e queria encomendar.')">
+                    <div class="w-20 h-20 mx-auto bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
+                        <i data-lucide="crown" class="w-8 h-8 text-rose-400"></i>
+                    </div>
+                    <h3 class="font-display text-2xl font-bold text-gray-800 mb-2">Tiaras e Faixas</h3>
+                    <p class="text-gray-600 text-sm mb-4">Acessórios fofos e confortáveis. Em todas as cores!</p>
+                    <span class="text-rose-500 font-bold text-sm flex items-center justify-center gap-1"><i data-lucide="message-circle" class="w-4 h-4"></i> Pedir</span>
+                </div>
+
+                <div class="bg-teal-50 rounded-3xl p-6 text-center hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-teal-200 hover:-translate-y-2 cursor-pointer" data-aos="fade-up" data-aos-delay="200" onclick="openWhatsApp('Oi Laurinha! Quero encomendar um Top/Cropped maravilhoso!')">
+                    <div class="w-20 h-20 mx-auto bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
+                        <i data-lucide="shirt" class="w-8 h-8 text-teal-400"></i>
+                    </div>
+                    <h3 class="font-display text-2xl font-bold text-gray-800 mb-2">Tops e Croppeds</h3>
+                    <p class="text-gray-600 text-sm mb-4">Modelos exclusivos ajustados ao teu corpo.</p>
+                    <span class="text-teal-500 font-bold text-sm flex items-center justify-center gap-1"><i data-lucide="message-circle" class="w-4 h-4"></i> Pedir</span>
+                </div>
+
+                <div class="bg-blue-50 rounded-3xl p-6 text-center hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-blue-200 hover:-translate-y-2 cursor-pointer" data-aos="fade-up" data-aos-delay="300" onclick="openWhatsApp('Oi Laurinha! Quero uma Touca/Gorro bem quentinho.')">
+                    <div class="w-20 h-20 mx-auto bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
+                        <i data-lucide="snowflake" class="w-8 h-8 text-blue-400"></i>
+                    </div>
+                    <h3 class="font-display text-2xl font-bold text-gray-800 mb-2">Toucas e Gorros</h3>
+                    <p class="text-gray-600 text-sm mb-4">Para ficares quentinha com muito estilo!</p>
+                    <span class="text-blue-500 font-bold text-sm flex items-center justify-center gap-1"><i data-lucide="message-circle" class="w-4 h-4"></i> Pedir</span>
+                </div>
+
+                <div class="bg-yellow-50 rounded-3xl p-6 text-center hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-yellow-200 hover:-translate-y-2 cursor-pointer" data-aos="fade-up" data-aos-delay="400" onclick="openWhatsApp('Oi Laurinha! Amei as bolsinhas, quero encomendar uma.')">
+                    <div class="w-20 h-20 mx-auto bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
+                        <i data-lucide="shopping-bag" class="w-8 h-8 text-yellow-500"></i>
+                    </div>
+                    <h3 class="font-display text-2xl font-bold text-gray-800 mb-2">Bolsinhas</h3>
+                    <p class="text-gray-600 text-sm mb-4">Nécessaires e bolsinhas super charmosas.</p>
+                    <span class="text-yellow-600 font-bold text-sm flex items-center justify-center gap-1"><i data-lucide="message-circle" class="w-4 h-4"></i> Pedir</span>
+                </div>
+
+                <div class="bg-purple-50 rounded-3xl p-6 text-center hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-purple-200 hover:-translate-y-2 cursor-pointer sm:col-span-2 lg:col-span-2" data-aos="fade-up" data-aos-delay="500" onclick="openWhatsApp('Oi Laurinha! Tenho uma ideia super específica para um item personalizado!')">
+                    <div class="w-20 h-20 mx-auto bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
+                        <i data-lucide="palette" class="w-8 h-8 text-purple-400"></i>
+                    </div>
+                    <h3 class="font-display text-2xl font-bold text-gray-800 mb-2">Itens 100% Personalizados</h3>
+                    <p class="text-gray-600 mb-4 max-w-md mx-auto">Tens uma ideia na cabeça? Nós fazemos acontecer com agulhas e fios. Seja o que for!</p>
+                    <span class="text-purple-500 font-bold text-sm flex items-center justify-center gap-1"><i data-lucide="message-circle" class="w-4 h-4"></i> Falar sobre a minha ideia</span>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- WhatsApp Form Section -->
+    <section id="contato" class="py-20 bg-atelie-light relative">
+        <div class="max-w-4xl mx-auto px-4 relative z-10">
+            <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-rose-100 flex flex-col md:flex-row" data-aos="zoom-in">
+                
+                <!-- Left Info Side -->
+                <div class="bg-rose-100 p-10 md:w-2/5 flex flex-col justify-center items-center text-center relative overflow-hidden">
+                    <!-- Decorative background element -->
+                    <div class="absolute -top-10 -left-10 w-40 h-40 bg-rose-200 rounded-full mix-blend-multiply opacity-50 blur-xl"></div>
+                    
+                    <div class="w-32 h-32 bg-white rounded-full p-2 shadow-md mb-6 relative z-10">
+                        <img src="https://ui-avatars.com/api/?name=Laurinha&background=fca5a5&color=fff&size=128&rounded=true" alt="Avatar Laurinha" class="w-full h-full rounded-full">
+                    </div>
+                    <h3 class="font-display text-2xl font-bold text-gray-800 mb-2 relative z-10">Olá, sou a Laurinha!</h3>
+                    <p class="text-gray-700 mb-6 relative z-10">Basta escolheres o que queres, mandares mensagem e conversamos no WhatsApp!</p>
+                    
+                    <div class="flex items-center gap-2 text-green-600 font-bold bg-green-50 px-4 py-2 rounded-full relative z-10">
+                        <i data-lucide="message-circle" class="w-5 h-5"></i>
+                        Resposta Rápida
+                    </div>
+                </div>
+
+                <!-- Right Form Side (Generates WhatsApp Link) -->
+                <div class="p-10 md:w-3/5">
+                    <h3 class="font-display text-3xl font-bold text-gray-800 mb-2">Monta o teu pedido</h3>
+                    <p class="text-gray-500 mb-6 text-sm">Preenche abaixo e envia direto para o meu WhatsApp.</p>
+                    
+                    <form id="whatsAppForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-600 mb-1">O teu Nome</label>
+                            <input type="text" id="wpName" placeholder="Como te chamas?" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-600 mb-1">O que queres encomendar?</label>
+                            <select id="wpProduct" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent transition-all bg-white">
+                                <option value="uma Tiara/Faixa">Uma Tiara/Faixa</option>
+                                <option value="um Top/Cropped">Um Top/Cropped</option>
+                                <option value="uma Touca/Gorro">Uma Touca/Gorro</option>
+                                <option value="uma Bolsinha">Uma Bolsinha</option>
+                                <option value="um Presente Especial (Dia dos Namorados, etc)">Presente Especial (Ex: Dia dos Namorados)</option>
+                                <option value="um Item Personalizado diferente">Outro Item Personalizado</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-600 mb-1">Detalhes (Cores, tamanho, ideia...)</label>
+                            <textarea id="wpDetails" rows="3" placeholder="Conta-me como imaginas a peça..." class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent transition-all"></textarea>
+                        </div>
+                        <button type="button" onclick="buildAndSendWhatsApp()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-xl transition-colors shadow-lg shadow-green-200 flex justify-center items-center gap-2 transform hover:-translate-y-1">
+                            <i data-lucide="send" class="w-5 h-5"></i>
+                            Enviar para o WhatsApp
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-white pt-16 pb-8 border-t border-rose-100">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex items-center gap-2">
+                <i data-lucide="scissors" class="text-rose-400 w-6 h-6"></i>
+                <span class="font-display font-semibold text-xl text-gray-800">Ateliê da Laurinha</span>
+            </div>
+            
+            <p class="text-gray-500 text-sm text-center md:text-left">
+                &copy; 2026 Ateliê da Laurinha. Todos os direitos reservados. Feito com <i data-lucide="heart" class="w-4 h-4 inline text-rose-500 fill-rose-500"></i>.
+            </p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // Inicializar ícones
+        lucide.createIcons();
+
+        // Inicializar Animações de Scroll
+        AOS.init({
+            once: true, // Anima apenas uma vez ao fazer scroll
+            offset: 50,
+            duration: 800,
+        });
+
+        // Toggle do Menu Mobile
+        const btn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('mobile-menu');
+
+        btn.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+        });
+
+        // Fechar menu mobile ao clicar em links
+        menu.querySelectorAll('a, button').forEach(el => {
+            el.addEventListener('click', () => menu.classList.add('hidden'));
+        });
+
+        // Navbar Sombra no scroll
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 20) {
+                nav.classList.add('shadow-md');
+            } else {
+                nav.classList.remove('shadow-md');
+            }
+        });
+
+        // Função Genérica para abrir WhatsApp
+        function openWhatsApp(customMessage) {
+            const text = encodeURIComponent(customMessage);
+            window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${text}`, '_blank');
+        }
+
+        // Função para construir mensagem do formulário e enviar para WhatsApp
+        function buildAndSendWhatsApp() {
+            const name = document.getElementById('wpName').value.trim() || 'Alguém';
+            const product = document.getElementById('wpProduct').value;
+            const details = document.getElementById('wpDetails').value.trim();
+
+            let message = `Olá Laurinha! O meu nome é ${name} e estou a entrar em contacto pelo teu site.\n\n`;
+            message += `Gostaria de encomendar: *${product}*.\n`;
+            
+            if (details) {
+                message += `\n*Detalhes:* ${details}\n`;
+            }
+            
+            message += `\nComo podemos fazer?`;
+
+            openWhatsApp(message);
+        }
+
+        // Efeito Máquina de Escrever (Typing Effect)
+        const phrases = [
+            "amor.", 
+            "afeto.", 
+            "arte.", 
+            "um abraço quentinho.", 
+            "presente especial."
+        ];
+        
+        let phraseIndex = 0;
+        let letterIndex = 0;
+        let isDeleting = false;
+        let typingSpeed = 100;
+        const typingElement = document.getElementById('typing-text');
+
+        function typeEffect() {
+            const currentPhrase = phrases[phraseIndex];
+            
+            if (isDeleting) {
+                typingElement.textContent = currentPhrase.substring(0, letterIndex - 1);
+                letterIndex--;
+                typingSpeed = 50; // Apaga mais rápido
+            } else {
+                typingElement.textContent = currentPhrase.substring(0, letterIndex + 1);
+                letterIndex++;
+                typingSpeed = 120; // Digita mais devagar
+            }
+
+            // Se terminou de escrever a palavra
+            if (!isDeleting && letterIndex === currentPhrase.length) {
+                isDeleting = true;
+                typingSpeed = 1500; // Pausa antes de apagar
+            } 
+            // Se terminou de apagar a palavra
+            else if (isDeleting && letterIndex === 0) {
+                isDeleting = false;
+                phraseIndex = (phraseIndex + 1) % phrases.length;
+                typingSpeed = 500; // Pausa antes de começar a nova palavra
+            }
+
+            setTimeout(typeEffect, typingSpeed);
+        }
+
+        // Iniciar o efeito de digitação assim que a página carregar
+        window.addEventListener('load', typeEffect);
+
+    </script>
+</body>
+</html>
