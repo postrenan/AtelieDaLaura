@@ -94,7 +94,7 @@ async function initDb() {
                 for (const f of data.finances) {
                     await client.query('INSERT INTO finances (type, description, amount, date) VALUES ($1, $2, $3, $4)', [f.type, f.description, f.amount, f.date]);
                 }
-                console.log(\`Migrated \${data.finances.length} finances.\`);
+                console.log(`Migrated ${data.finances.length} finances.`);
             }
 
             if (data.materials && data.materials.length > 0) {
@@ -106,7 +106,7 @@ async function initDb() {
                     await client.query('INSERT INTO materials (id, name, quantity, unit, cost) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (id) DO NOTHING', [m.id, m.name, m.quantity, m.unit, m.cost]);
                 }
                 await client.query("SELECT setval('materials_id_seq', (SELECT MAX(id) FROM materials));");
-                console.log(\`Migrated \${data.materials.length} materials.\`);
+                console.log(`Migrated ${data.materials.length} materials.`);
             }
 
             if (data.orders && data.orders.length > 0) {
@@ -114,7 +114,7 @@ async function initDb() {
                     await client.query('INSERT INTO orders (id, client_name, piece_details, delivery_date, status, created_at) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (id) DO NOTHING', [o.id, o.clientName, o.pieceDetails, o.deliveryDate || null, o.status, o.createdAt || new Date()]);
                 }
                 await client.query("SELECT setval('orders_id_seq', (SELECT MAX(id) FROM orders));");
-                console.log(\`Migrated \${data.orders.length} orders.\`);
+                console.log(`Migrated ${data.orders.length} orders.`);
             }
             
             if (data.stock && data.stock.length > 0) {
@@ -122,7 +122,7 @@ async function initDb() {
                     await client.query('INSERT INTO stock (id, piece_name, quantity, price) VALUES ($1, $2, $3, $4) ON CONFLICT (id) DO NOTHING', [s.id, s.pieceName, s.quantity, s.price]);
                 }
                 await client.query("SELECT setval('stock_id_seq', (SELECT MAX(id) FROM stock));");
-                console.log(\`Migrated \${data.stock.length} stock items.\`);
+                console.log(`Migrated ${data.stock.length} stock items.`);
             }
 
             if (data.feedbacks && data.feedbacks.length > 0) {
@@ -130,7 +130,7 @@ async function initDb() {
                     await client.query('INSERT INTO feedbacks (id, client_name, message, rating, date) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (id) DO NOTHING', [fb.id, fb.clientName || 'Anônimo', fb.message, fb.rating, fb.date || new Date()]);
                 }
                 await client.query("SELECT setval('feedbacks_id_seq', (SELECT MAX(id) FROM feedbacks));");
-                console.log(\`Migrated \${data.feedbacks.length} feedbacks.\`);
+                console.log(`Migrated ${data.feedbacks.length} feedbacks.`);
             }
 
             if (data.production_logs && data.production_logs.length > 0) {
@@ -138,7 +138,7 @@ async function initDb() {
                     await client.query('INSERT INTO production_logs (id, piece_name, hours_spent, materials_used, linked_order_id, date) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (id) DO NOTHING', [pl.id, pl.pieceName, pl.hoursSpent, JSON.stringify(pl.materialsUsed || []), pl.linkedOrderId || null, pl.date || new Date()]);
                 }
                 await client.query("SELECT setval('production_logs_id_seq', (SELECT MAX(id) FROM production_logs));");
-                console.log(\`Migrated \${data.production_logs.length} production logs.\`);
+                console.log(`Migrated ${data.production_logs.length} production logs.`);
             }
 
             console.log("Migration from data.json completed!");
