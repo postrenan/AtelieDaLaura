@@ -96,6 +96,9 @@ async function initDb() {
             );
         `);
 
+        // Migrations for existing tables
+        await client.query(`ALTER TABLE stock ADD COLUMN IF NOT EXISTS cost DECIMAL(10, 2) DEFAULT 0;`);
+
         console.log("Tables created successfully.");
 
         // Migration from data.json if exists

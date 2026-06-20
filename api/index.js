@@ -94,6 +94,28 @@ app.post('/api/materials', async (req, res) => {
     }
 });
 
+app.put('/api/materials/:id', async (req, res) => {
+    const { name, quantity, unit, cost } = req.body;
+    try {
+        const result = await pool.query(
+            'UPDATE materials SET name=$1, quantity=$2, unit=$3, cost=$4 WHERE id=$5 RETURNING *',
+            [name, quantity, unit, cost, req.params.id]
+        );
+        res.json(result.rows[0]);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete('/api/materials/:id', async (req, res) => {
+    try {
+        await pool.query('DELETE FROM materials WHERE id=$1', [req.params.id]);
+        res.status(204).send();
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // ---- ORDERS API ----
 app.get('/api/orders', async (req, res) => {
     try {
@@ -119,29 +141,59 @@ app.post('/api/orders', async (req, res) => {
 });
 
 // ---- STOCK API ----
+const mapStock = (row) => ({
+    id: row.id,
+    name: row.piece_name,
+    quantity: row.quantity,
+    cost: row.cost ?? 0,
+    price: row.price
+});
+
 app.get('/api/stock', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM stock ORDER BY id ASC');
-        res.json(result.rows);
+        res.json(result.rows.map(mapStock));
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
 app.post('/api/stock', async (req, res) => {
-    const { pieceName, quantity, price } = req.body;
+    const { name, quantity, cost, price } = req.body;
     try {
         const result = await pool.query(
-            'INSERT INTO stock (piece_name, quantity, price) VALUES ($1, $2, $3) RETURNING *',
-            [pieceName, quantity, price]
+            'INSERT INTO stock (piece_name, quantity, cost, price) VALUES ($1, $2, $3, $4) RETURNING *',
+            [name, quantity, cost ?? 0, price]
         );
-        res.json(result.rows[0]);
+        res.json(mapStock(result.rows[0]));
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// ---- PRODUCTION LOGS API (Strava) ----
+app.put('/api/stock/:id', async (req, res) => {
+    const { name, quantity, cost, price } = req.body;
+    try {
+        const result = await pool.query(
+            'UPDATE stock SET piece_name=$1, quantity=$2, cost=$3, price=$4 WHERE id=$5 RETURNING *',
+            [name, quantity, cost ?? 0, price, req.params.id]
+        );
+        res.json(mapStock(result.rows[0]));
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete('/api/stock/:id', async (req, res) => {
+    try {
+        await pool.query('DELETE FROM stock WHERE id=$1', [req.params.id]);
+        res.status(204).send();
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ---- PRODUCTION LOGS API ----
 app.get('/api/production_logs', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM production_logs ORDER BY date DESC');
@@ -205,6 +257,15 @@ app.post('/api/production_logs', async (req, res) => {
         res.status(500).json({ error: err.message });
     } finally {
         client.release();
+    }
+});
+
+app.delete('/api/production_logs/:id', async (req, res) => {
+    try {
+        await pool.query('DELETE FROM production_logs WHERE id=$1', [req.params.id]);
+        res.status(204).send();
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 });
 

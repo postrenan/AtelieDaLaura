@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { Trash2 } from '@lucide/vue';
 
 const materials = ref([]);
 const orders = ref([]);
@@ -26,7 +27,7 @@ const fetchData = async () => {
         orders.value = Array.isArray(ord) ? ord : [];
         productionLogs.value = Array.isArray(log) ? log : [];
     } catch (e) {
-        console.error("Error fetching data", e);
+        console.error('Error fetching data', e);
     }
 };
 
@@ -49,56 +50,65 @@ const submitLog = async () => {
             body: JSON.stringify(newLog.value)
         });
         const savedLog = await res.json();
-        productionLogs.value.push(savedLog);
-        
-        // Update local orders if linked
+        productionLogs.value.unshift(savedLog);
+
         if (newLog.value.linkedOrderId) {
             const order = orders.value.find(o => o.id === newLog.value.linkedOrderId);
             if (order) order.status = 'concluído';
         }
-        
-        // Reset
+
         newLog.value = { pieceName: '', hoursSpent: 0, linkedOrderId: '', materialsUsed: [] };
-        
-        // Re-fetch materials to update inventory
+
         const matRes = await fetch('/api/materials', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('alma_token') } });
         const matData = await matRes.json();
         materials.value = Array.isArray(matData) ? matData : [];
     } catch (e) {
-        console.error("Error submitting log", e);
+        console.error('Error submitting log', e);
+    }
+};
+
+const deleteLog = async (id) => {
+    if (!confirm('Excluir este registro? Os materiais descontados NÃO serão devolvidos ao estoque automaticamente.')) return;
+    try {
+        await fetch(`/api/production_logs/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': 'Bearer ' + localStorage.getItem('alma_token') }
+        });
+        productionLogs.value = productionLogs.value.filter(l => l.id !== id);
+    } catch (e) {
+        console.error('Error deleting log', e);
     }
 };
 
 onMounted(fetchData);
 
-const pendingOrders = computed(() => {
-    return orders.value.filter(o => o.status !== 'concluído');
-});
+const pendingOrders = computed(() => orders.value.filter(o => o.status !== 'concluído'));
 
 const getMaterialName = (id) => {
     const mat = materials.value.find(m => m.id === id);
     return mat ? `${mat.name} (${mat.unit})` : 'Material desconhecido';
 };
+
+const formatDate = (d) => new Date(d).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 </script>
 
 <template>
     <div class="space-y-6">
         <h1 class="text-2xl font-bold text-gray-900">Registro de Produção</h1>
-        <p class="text-gray-600">Registre o que você produziu hoje para alimentar suas métricas.</p>
-        
+        <p class="text-gray-600 -mt-4">Registre o que você produziu hoje para alimentar suas métricas.</p>
+
+        <!-- Form -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="p-6 border-b border-gray-100">
+            <div class="p-6">
                 <form @submit.prevent="submitLog" class="space-y-6">
-                    
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Nome da Peça / Produção</label>
-                            <input type="text" v-model="newLog.pieceName" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-rose-500 focus:ring-rose-500 sm:text-sm p-2 border" placeholder="Ex: Ursinho Amigurumi" />
+                            <label for="log-piece" class="block text-sm font-medium text-gray-700">Nome da Peça / Produção</label>
+                            <input id="log-piece" type="text" v-model="newLog.pieceName" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-rose-500 focus:ring-rose-500 sm:text-sm p-2 border" placeholder="Ex: Ursinho Amigurumi" />
                         </div>
-                        
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Horas Gastas</label>
-                            <input type="number" step="0.5" v-model="newLog.hoursSpent" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-rose-500 focus:ring-rose-500 sm:text-sm p-2 border" placeholder="Ex: 4.5" />
+                            <label for="log-hours" class="block text-sm font-medium text-gray-700">Horas Gastas</label>
+                            <input id="log-hours" type="number" step="0.5" v-model="newLog.hoursSpent" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-rose-500 focus:ring-rose-500 sm:text-sm p-2 border" placeholder="Ex: 4.5" />
                         </div>
                     </div>
 
@@ -106,8 +116,8 @@ const getMaterialName = (id) => {
                         <label class="block text-sm font-medium text-gray-700 mb-2">Materiais Consumidos</label>
                         <div class="flex gap-4 items-end mb-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
                             <div class="flex-1">
-                                <label class="block text-xs font-medium text-gray-500">Material</label>
-                                <select v-model="currentMaterial.materialId" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-rose-500 focus:ring-rose-500 sm:text-sm p-2 border bg-white">
+                                <label for="log-mat" class="block text-xs font-medium text-gray-500">Material</label>
+                                <select id="log-mat" v-model="currentMaterial.materialId" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-rose-500 focus:ring-rose-500 sm:text-sm p-2 border bg-white">
                                     <option value="" disabled>Selecione um material</option>
                                     <option v-for="mat in materials" :key="mat.id" :value="mat.id">
                                         {{ mat.name }} (Estoque: {{ mat.quantity }} {{ mat.unit }})
@@ -115,14 +125,13 @@ const getMaterialName = (id) => {
                                 </select>
                             </div>
                             <div class="w-32">
-                                <label class="block text-xs font-medium text-gray-500">Quantidade</label>
-                                <input type="number" step="0.01" v-model="currentMaterial.quantityUsed" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-rose-500 focus:ring-rose-500 sm:text-sm p-2 border bg-white" />
+                                <label for="log-matqty" class="block text-xs font-medium text-gray-500">Quantidade</label>
+                                <input id="log-matqty" type="number" step="0.01" v-model="currentMaterial.quantityUsed" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-rose-500 focus:ring-rose-500 sm:text-sm p-2 border bg-white" />
                             </div>
                             <button type="button" @click="addMaterialToLog" class="bg-gray-800 hover:bg-gray-900 text-white font-medium py-2 px-4 rounded-md transition-colors text-sm">
                                 + Adicionar
                             </button>
                         </div>
-
                         <ul v-if="newLog.materialsUsed.length > 0" class="mt-2 divide-y divide-gray-200 border rounded-lg">
                             <li v-for="(mu, index) in newLog.materialsUsed" :key="index" class="p-3 flex justify-between items-center bg-white text-sm">
                                 <span><span class="font-medium">{{ mu.quantityUsed }}</span> x {{ getMaterialName(mu.materialId) }}</span>
@@ -132,8 +141,8 @@ const getMaterialName = (id) => {
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Vincular a Encomenda (Opcional)</label>
-                        <select v-model="newLog.linkedOrderId" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-rose-500 focus:ring-rose-500 sm:text-sm p-2 border">
+                        <label for="log-order" class="block text-sm font-medium text-gray-700">Vincular a Encomenda (Opcional)</label>
+                        <select id="log-order" v-model="newLog.linkedOrderId" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-rose-500 focus:ring-rose-500 sm:text-sm p-2 border">
                             <option value="">Nenhuma (Produção Livre / Pronta Entrega)</option>
                             <option v-for="order in pendingOrders" :key="order.id" :value="order.id">
                                 {{ order.item }} - {{ order.customer }} (Pendente)
@@ -150,6 +159,48 @@ const getMaterialName = (id) => {
                 </form>
             </div>
         </div>
+
+        <!-- Logs list -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="p-4 border-b border-gray-100">
+                <h2 class="text-lg font-medium text-gray-900">Histórico de Produções</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Peça</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Horas</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Materiais Usados</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr v-for="log in productionLogs" :key="log.id" class="hover:bg-gray-50">
+                            <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ log.pieceName }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-500">{{ log.hoursSpent }}h</td>
+                            <td class="px-4 py-3 text-sm text-gray-500">
+                                <span v-if="!log.materialsUsed || log.materialsUsed.length === 0" class="text-gray-400 italic">Nenhum</span>
+                                <ul v-else class="space-y-0.5">
+                                    <li v-for="(mu, i) in log.materialsUsed" :key="i" class="text-xs">
+                                        {{ mu.quantityUsed }} × {{ getMaterialName(mu.materialId) }}
+                                    </li>
+                                </ul>
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">{{ formatDate(log.date) }}</td>
+                            <td class="px-4 py-3 text-right">
+                                <button @click="deleteLog(log.id)" class="flex items-center gap-1 text-xs text-red-500 hover:text-red-700 font-medium px-2 py-1 rounded hover:bg-red-50 transition-colors ml-auto">
+                                    <Trash2 class="w-3 h-3" /> Excluir
+                                </button>
+                            </td>
+                        </tr>
+                        <tr v-if="productionLogs.length === 0">
+                            <td colspan="5" class="px-4 py-6 text-center text-sm text-gray-500">Nenhuma produção registrada ainda.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </template>
-
