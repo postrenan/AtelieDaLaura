@@ -186,8 +186,9 @@ const analyzeImages = async () => {
             })
         });
         if (!res.ok) {
-            const err = await res.json();
-            alert('Erro ao analisar: ' + (err.error || 'Tente novamente'));
+            let errMsg = 'Tente novamente';
+            try { const body = await res.json(); errMsg = body.error || errMsg; } catch {}
+            alert('Erro ao analisar: ' + errMsg);
             scannerMode.value = 'review'; return;
         }
         const data = await res.json();
@@ -198,7 +199,7 @@ const analyzeImages = async () => {
         closeScanner();
     } catch (err) {
         console.error('Error analyzing image:', err);
-        alert('Erro ao analisar. Verifique se GROQ_API_KEY está configurada.');
+        alert('Erro de rede ao conectar com o servidor: ' + err.message);
         scannerMode.value = 'review';
     }
 };
