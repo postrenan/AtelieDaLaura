@@ -3,7 +3,7 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import { Camera, Loader, Sparkles, X, Image, RotateCcw, Zap, Pencil, Trash2, Check } from '@lucide/vue';
 
 const materials = ref([]);
-const newMaterial = ref({ name: '', cost: 0, unit: 'novelo', quantity: 1 });
+const newMaterial = ref({ name: '', brand: '', color: '', fiber: '', cost: 0, unit: 'novelo', quantity: 1, meters_per_unit: 0 });
 const editingId = ref(null);
 const editForm = ref({});
 
@@ -33,10 +33,22 @@ const addMaterial = async () => {
         });
         const saved = await res.json();
         materials.value.push(saved);
-        newMaterial.value = { name: '', cost: 0, unit: 'novelo', quantity: 1 };
+        newMaterial.value = { name: '', brand: '', color: '', fiber: '', cost: 0, unit: 'novelo', quantity: 1, meters_per_unit: 0 };
     } catch (e) {
         console.error('Error adding material', e);
     }
+};
+
+const totalMeters = (mat) => {
+    const qty = Number(mat.quantity);
+    const mpu = Number(mat.meters_per_unit);
+    return qty > 0 && mpu > 0 ? qty * mpu : null;
+};
+
+const costPerMeter = (mat) => {
+    const total = totalMeters(mat);
+    const cost = Number(mat.cost);
+    return total && cost > 0 ? cost / total : null;
 };
 
 const startEdit = (mat) => {
@@ -199,7 +211,10 @@ const analyzeImages = async () => {
         }
         const data = await res.json();
         if (data.name) newMaterial.value.name = data.name;
-        if (data.cost) newMaterial.value.cost = data.cost;
+        if (data.brand) newMaterial.value.brand = data.brand;
+        if (data.color) newMaterial.value.color = data.color;
+        if (data.fiber) newMaterial.value.fiber = data.fiber;
+        if (data.meters_per_unit) newMaterial.value.meters_per_unit = data.meters_per_unit;
         if (data.unit) newMaterial.value.unit = data.unit;
         if (data.quantity) newMaterial.value.quantity = data.quantity;
         closeScanner();
@@ -336,43 +351,66 @@ onUnmounted(stopCamera);
                     </div>
                 </div>
 
-                <form @submit.prevent="addMaterial" class="flex flex-wrap gap-4 items-end">
-                    <div class="flex-2 min-w-[200px]">
-                        <label for="mat-name" class="block text-sm font-medium text-gray-700">Nome do Material</label>
-                        <input id="mat-name" type="text" v-model="newMaterial.name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-rose-500 focus:ring-rose-500 sm:text-sm p-2 border" placeholder="Ex: Fio Anne Rosa Quartzo 100m" />
+                <form @submit.prevent="addMaterial" class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="lg:col-span-2">
+                            <label for="mat-name" class="block text-sm font-medium text-gray-700">Nome / Tipo do Fio *</label>
+                            <input id="mat-name" type="text" v-model="newMaterial.name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-rose-500 focus:ring-rose-500 sm:text-sm p-2 border" placeholder="Ex: Fio Encorpado, Linha de Crochê" />
+                        </div>
+                        <div>
+                            <label for="mat-brand" class="block text-sm font-medium text-gray-700">Marca</label>
+                            <input id="mat-brand" type="text" v-model="newMaterial.brand" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-rose-500 focus:ring-rose-500 sm:text-sm p-2 border" placeholder="Ex: Anne, Fio Cisne" />
+                        </div>
+                        <div>
+                            <label for="mat-color" class="block text-sm font-medium text-gray-700">Cor</label>
+                            <input id="mat-color" type="text" v-model="newMaterial.color" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-rose-500 focus:ring-rose-500 sm:text-sm p-2 border" placeholder="Ex: Rosa Quartzo, Azul Bebê" />
+                        </div>
+                        <div>
+                            <label for="mat-fiber" class="block text-sm font-medium text-gray-700">Composição</label>
+                            <input id="mat-fiber" type="text" v-model="newMaterial.fiber" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-rose-500 focus:ring-rose-500 sm:text-sm p-2 border" placeholder="Ex: 100% algodão" />
+                        </div>
+                        <div>
+                            <label for="mat-mpu" class="block text-sm font-medium text-gray-700">Metros por Unidade</label>
+                            <input id="mat-mpu" type="number" step="0.01" v-model="newMaterial.meters_per_unit" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-rose-500 focus:ring-rose-500 sm:text-sm p-2 border" placeholder="Ex: 100" />
+                        </div>
+                        <div>
+                            <label for="mat-unit" class="block text-sm font-medium text-gray-700">Unidade de Estoque</label>
+                            <select id="mat-unit" v-model="newMaterial.unit" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-rose-500 focus:ring-rose-500 sm:text-sm p-2 border">
+                                <option value="novelo">Novelo(s)</option>
+                                <option value="metros">Metros</option>
+                                <option value="gramas">Gramas</option>
+                                <option value="unidade">Unidade(s)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="mat-qty" class="block text-sm font-medium text-gray-700">Quantidade em Estoque *</label>
+                            <input id="mat-qty" type="number" step="0.01" v-model="newMaterial.quantity" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-rose-500 focus:ring-rose-500 sm:text-sm p-2 border" />
+                        </div>
+                        <div>
+                            <label for="mat-cost" class="block text-sm font-medium text-gray-700">Custo Total Pago (R$) *</label>
+                            <input id="mat-cost" type="number" step="0.01" v-model="newMaterial.cost" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-rose-500 focus:ring-rose-500 sm:text-sm p-2 border" />
+                        </div>
                     </div>
-                    <div class="flex-1 min-w-[130px]">
-                        <label for="mat-cost" class="block text-sm font-medium text-gray-700">Custo Total (R$)</label>
-                        <input id="mat-cost" type="number" step="0.01" v-model="newMaterial.cost" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-rose-500 focus:ring-rose-500 sm:text-sm p-2 border" />
+                    <div class="flex justify-end">
+                        <button type="submit" class="bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 px-6 rounded-md transition-colors">
+                            Adicionar Material
+                        </button>
                     </div>
-                    <div class="flex-1 min-w-[130px]">
-                        <label for="mat-unit" class="block text-sm font-medium text-gray-700">Unidade</label>
-                        <select id="mat-unit" v-model="newMaterial.unit" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-rose-500 focus:ring-rose-500 sm:text-sm p-2 border">
-                            <option value="novelo">Novelo(s)</option>
-                            <option value="metros">Metros</option>
-                            <option value="gramas">Gramas</option>
-                            <option value="unidade">Unidade(s)</option>
-                        </select>
-                    </div>
-                    <div class="flex-1 min-w-[130px]">
-                        <label for="mat-qty" class="block text-sm font-medium text-gray-700">Quantidade</label>
-                        <input id="mat-qty" type="number" step="0.01" v-model="newMaterial.quantity" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-rose-500 focus:ring-rose-500 sm:text-sm p-2 border" />
-                    </div>
-                    <button type="submit" class="bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 px-6 rounded-md transition-colors">
-                        Adicionar
-                    </button>
                 </form>
             </div>
 
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
+                <table class="min-w-full divide-y divide-gray-200 text-sm">
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Material</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Custo</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Marca / Cor</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Composição</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Qtd</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unidade</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Custo/Un.</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Metros/Un.</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Metros</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Custo/m</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Custo Total</th>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
                         </tr>
                     </thead>
@@ -380,25 +418,34 @@ onUnmounted(stopCamera);
                         <template v-for="mat in materials" :key="mat.id">
                             <!-- Edit row -->
                             <tr v-if="editingId === mat.id" class="bg-amber-50">
-                                <td class="px-4 py-2">
-                                    <input v-model="editForm.name" class="w-full rounded border border-gray-300 p-1.5 text-sm focus:border-amber-400 focus:outline-none" />
+                                <td class="px-3 py-2">
+                                    <input v-model="editForm.name" placeholder="Nome" class="w-full rounded border border-gray-300 p-1.5 text-sm focus:border-amber-400 focus:outline-none" />
                                 </td>
-                                <td class="px-4 py-2">
-                                    <input v-model="editForm.cost" type="number" step="0.01" class="w-24 rounded border border-gray-300 p-1.5 text-sm focus:border-amber-400 focus:outline-none" />
+                                <td class="px-3 py-2 space-y-1">
+                                    <input v-model="editForm.brand" placeholder="Marca" class="w-full rounded border border-gray-300 p-1.5 text-sm focus:border-amber-400 focus:outline-none" />
+                                    <input v-model="editForm.color" placeholder="Cor" class="w-full rounded border border-gray-300 p-1.5 text-sm focus:border-amber-400 focus:outline-none" />
                                 </td>
-                                <td class="px-4 py-2">
+                                <td class="px-3 py-2">
+                                    <input v-model="editForm.fiber" placeholder="Ex: 100% algodão" class="w-32 rounded border border-gray-300 p-1.5 text-sm focus:border-amber-400 focus:outline-none" />
+                                </td>
+                                <td class="px-3 py-2">
                                     <input v-model="editForm.quantity" type="number" step="0.01" class="w-20 rounded border border-gray-300 p-1.5 text-sm focus:border-amber-400 focus:outline-none" />
-                                </td>
-                                <td class="px-4 py-2">
-                                    <select v-model="editForm.unit" class="rounded border border-gray-300 p-1.5 text-sm focus:border-amber-400 focus:outline-none">
+                                    <select v-model="editForm.unit" class="mt-1 w-full rounded border border-gray-300 p-1.5 text-sm focus:border-amber-400 focus:outline-none">
                                         <option value="novelo">Novelo(s)</option>
                                         <option value="metros">Metros</option>
                                         <option value="gramas">Gramas</option>
                                         <option value="unidade">Unidade(s)</option>
                                     </select>
                                 </td>
-                                <td class="px-4 py-2 text-sm text-gray-400">—</td>
-                                <td class="px-4 py-2 text-right">
+                                <td class="px-3 py-2">
+                                    <input v-model="editForm.meters_per_unit" type="number" step="0.01" placeholder="0" class="w-24 rounded border border-gray-300 p-1.5 text-sm focus:border-amber-400 focus:outline-none" />
+                                </td>
+                                <td class="px-3 py-2 text-gray-400 text-xs">—</td>
+                                <td class="px-3 py-2 text-gray-400 text-xs">—</td>
+                                <td class="px-3 py-2">
+                                    <input v-model="editForm.cost" type="number" step="0.01" class="w-24 rounded border border-gray-300 p-1.5 text-sm focus:border-amber-400 focus:outline-none" />
+                                </td>
+                                <td class="px-3 py-2 text-right">
                                     <div class="flex items-center justify-end gap-2">
                                         <button @click="saveEdit(mat.id)" class="flex items-center gap-1 text-xs font-bold bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg transition-colors">
                                             <Check class="w-3 h-3" /> Salvar
@@ -411,14 +458,31 @@ onUnmounted(stopCamera);
                             </tr>
                             <!-- Display row -->
                             <tr v-else class="hover:bg-gray-50">
-                                <td class="px-4 py-4 text-sm font-medium text-gray-900">{{ mat.name }}</td>
-                                <td class="px-4 py-4 text-sm text-gray-500">R$ {{ Number(mat.cost).toFixed(2) }}</td>
-                                <td class="px-4 py-4 text-sm text-gray-500">{{ mat.quantity }}</td>
-                                <td class="px-4 py-4 text-sm text-gray-500">{{ mat.unit }}</td>
-                                <td class="px-4 py-4 text-sm text-gray-500">
-                                    R$ {{ (Number(mat.cost) / Number(mat.quantity)).toFixed(2) }}
+                                <td class="px-4 py-3 font-medium text-gray-900">{{ mat.name }}</td>
+                                <td class="px-4 py-3 text-gray-600">
+                                    <span v-if="mat.brand" class="block font-medium">{{ mat.brand }}</span>
+                                    <span v-if="mat.color" class="block text-gray-400 text-xs">{{ mat.color }}</span>
+                                    <span v-if="!mat.brand && !mat.color" class="text-gray-300 text-xs">—</span>
                                 </td>
-                                <td class="px-4 py-4 text-right">
+                                <td class="px-4 py-3 text-gray-500 text-xs">{{ mat.fiber || '—' }}</td>
+                                <td class="px-4 py-3 text-gray-600">
+                                    <span class="font-medium">{{ mat.quantity }}</span>
+                                    <span class="text-gray-400 text-xs ml-1">{{ mat.unit }}</span>
+                                </td>
+                                <td class="px-4 py-3 text-gray-500">
+                                    <span v-if="mat.meters_per_unit > 0">{{ mat.meters_per_unit }}m</span>
+                                    <span v-else class="text-gray-300 text-xs">—</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span v-if="totalMeters(mat)" class="font-semibold text-violet-700">{{ totalMeters(mat).toFixed(0) }}m</span>
+                                    <span v-else class="text-gray-300 text-xs">—</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span v-if="costPerMeter(mat)" class="text-rose-600 font-medium">R$ {{ costPerMeter(mat).toFixed(3) }}</span>
+                                    <span v-else class="text-gray-300 text-xs">—</span>
+                                </td>
+                                <td class="px-4 py-3 text-gray-600">R$ {{ Number(mat.cost).toFixed(2) }}</td>
+                                <td class="px-4 py-3 text-right">
                                     <div class="flex items-center justify-end gap-2">
                                         <button @click="startEdit(mat)" class="flex items-center gap-1 text-xs text-amber-600 hover:text-amber-800 font-medium px-2 py-1 rounded hover:bg-amber-50 transition-colors">
                                             <Pencil class="w-3 h-3" /> Editar
@@ -431,7 +495,7 @@ onUnmounted(stopCamera);
                             </tr>
                         </template>
                         <tr v-if="materials.length === 0">
-                            <td colspan="6" class="px-4 py-6 text-center text-sm text-gray-500">Nenhum material registrado.</td>
+                            <td colspan="9" class="px-4 py-6 text-center text-sm text-gray-500">Nenhum material registrado.</td>
                         </tr>
                     </tbody>
                 </table>

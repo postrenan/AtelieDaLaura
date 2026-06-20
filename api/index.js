@@ -85,11 +85,11 @@ app.get('/api/materials', async (req, res) => {
 });
 
 app.post('/api/materials', async (req, res) => {
-    const { name, quantity, unit, cost } = req.body;
+    const { name, quantity, unit, cost, brand, color, fiber, meters_per_unit } = req.body;
     try {
         const result = await pool.query(
-            'INSERT INTO materials (name, quantity, unit, cost) VALUES ($1, $2, $3, $4) RETURNING *',
-            [name, quantity, unit, cost]
+            'INSERT INTO materials (name, quantity, unit, cost, brand, color, fiber, meters_per_unit) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
+            [name, quantity, unit, cost, brand || '', color || '', fiber || '', meters_per_unit || 0]
         );
         res.json(result.rows[0]);
     } catch (err) {
@@ -98,11 +98,11 @@ app.post('/api/materials', async (req, res) => {
 });
 
 app.put('/api/materials/:id', async (req, res) => {
-    const { name, quantity, unit, cost } = req.body;
+    const { name, quantity, unit, cost, brand, color, fiber, meters_per_unit } = req.body;
     try {
         const result = await pool.query(
-            'UPDATE materials SET name=$1, quantity=$2, unit=$3, cost=$4 WHERE id=$5 RETURNING *',
-            [name, quantity, unit, cost, req.params.id]
+            'UPDATE materials SET name=$1, quantity=$2, unit=$3, cost=$4, brand=$5, color=$6, fiber=$7, meters_per_unit=$8 WHERE id=$9 RETURNING *',
+            [name, quantity, unit, cost, brand || '', color || '', fiber || '', meters_per_unit || 0, req.params.id]
         );
         res.json(result.rows[0]);
     } catch (err) {
@@ -389,7 +389,7 @@ app.post('/api/analyze-material-image', async (req, res) => {
                     ...imageContents,
                     {
                         type: 'text',
-                        text: `Analise ${images.length > 1 ? 'estas ' + images.length + ' imagens do mesmo novelo/fio (frente, verso e laterais da embalagem)' : 'esta imagem de novelo/fio'}. Use todas as fotos juntas para extrair as informações mais completas possíveis. Retorne SOMENTE um JSON válido sem markdown: {"name": "nome completo do fio com cor e marca", "cost": null, "unit": "metros ou gramas ou novelo", "quantity": quantidade_numerica}. Para "unit": prefira "metros" se houver metragem visível em qualquer foto, "gramas" se só gramagem, "novelo" se nenhum. Para "cost" use sempre null. Para "quantity" use 1 se não encontrar. Responda APENAS com o JSON.`
+                        text: `Analise ${images.length > 1 ? 'estas ' + images.length + ' imagens do mesmo novelo/fio (frente, verso e laterais da embalagem)' : 'esta imagem de novelo/fio'}. Use todas as fotos juntas para extrair o máximo de informações. Retorne SOMENTE um JSON válido sem markdown com estes campos: {"name": "nome/tipo do fio sem marca e sem cor", "brand": "marca do fio ex: Anne Macia ou Fio Cisne", "color": "cor do fio ex: Rosa Quartzo ou Azul Bebê", "fiber": "composição ex: 100% algodão ou 50% lã 50% acrílico", "meters_per_unit": metros_por_novelo_numerico_ou_null, "unit": "metros ou gramas ou novelo", "quantity": 1}. Para "meters_per_unit": use o número de metros indicado na embalagem (ex: 100, 150, 200) ou null se não encontrar. Para "unit": prefira "metros" se houver metragem, "gramas" se só gramagem, "novelo" se nenhum. Para "quantity" sempre use 1. Para "fiber" use null se não encontrar. Responda APENAS com o JSON.`
                     }
                 ]
             }]

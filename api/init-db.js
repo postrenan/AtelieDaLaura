@@ -98,6 +98,10 @@ async function initDb() {
 
         // Migrations for existing tables
         await client.query(`ALTER TABLE stock ADD COLUMN IF NOT EXISTS cost DECIMAL(10, 2) DEFAULT 0;`);
+        await client.query(`ALTER TABLE materials ADD COLUMN IF NOT EXISTS brand VARCHAR(100) DEFAULT '';`);
+        await client.query(`ALTER TABLE materials ADD COLUMN IF NOT EXISTS color VARCHAR(100) DEFAULT '';`);
+        await client.query(`ALTER TABLE materials ADD COLUMN IF NOT EXISTS fiber VARCHAR(150) DEFAULT '';`);
+        await client.query(`ALTER TABLE materials ADD COLUMN IF NOT EXISTS meters_per_unit DECIMAL(10, 2) DEFAULT 0;`);
 
         console.log("Tables created successfully.");
 
