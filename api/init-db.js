@@ -7,9 +7,10 @@ import { fileURLToPath } from 'url';
 dotenv.config();
 
 const { Pool } = pg;
+const connString = process.env.DATABASE_URL_UNPOOLED || process.env.POSTGRES_URL;
 const pool = new Pool({
-  connectionString: process.env.POSTGRES_URL,
-  ssl: process.env.POSTGRES_URL && process.env.POSTGRES_URL.includes('localhost') ? false : { rejectUnauthorized: false }
+  connectionString: connString,
+  ssl: connString?.includes('localhost') ? false : { rejectUnauthorized: false }
 });
 
 const __filename = fileURLToPath(import.meta.url);

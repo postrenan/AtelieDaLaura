@@ -28,8 +28,8 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth) {
-    const token = localStorage.getItem('atelie_token');
-    if (token === 'atelie-secret-token') {
+    const token = localStorage.getItem('alma_token');
+    if (token === process.env.JWT_SECRET || token) {
       next();
     } else {
       next('/login');

@@ -7,10 +7,11 @@ dotenv.config();
 
 const { Pool } = pg;
 const app = express();
+app.disable('x-powered-by');
 
 const pool = new Pool({
   connectionString: process.env.POSTGRES_URL,
-  ssl: process.env.POSTGRES_URL && process.env.POSTGRES_URL.includes('localhost') ? false : { rejectUnauthorized: false }
+  ssl: process.env.POSTGRES_URL?.includes('localhost') ? false : { rejectUnauthorized: false }
 });
 
 app.use(cors());
@@ -23,7 +24,7 @@ app.post('/api/login', (req, res) => {
     const adminPass = process.env.ADMIN_PASSWORD || 'laura123';
     
     if (username === adminUser && password === adminPass) {
-        res.json({ token: process.env.JWT_SECRET || 'atelie-secret-token' });
+        res.json({ token: process.env.JWT_SECRET || 'alma-secret-token' });
     } else {
         res.status(401).json({ error: 'Credenciais inválidas' });
     }
@@ -35,7 +36,7 @@ app.use('/api', (req, res, next) => {
     if (req.path === '/feedbacks' && req.method === 'GET') return next();
 
     const authHeader = req.headers.authorization;
-    const validToken = process.env.JWT_SECRET || 'atelie-secret-token';
+    const validToken = process.env.JWT_SECRET || 'alma-secret-token';
     
     if (authHeader === `Bearer ${validToken}`) {
         next();

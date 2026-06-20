@@ -1,20 +1,19 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Nunito', sans-serif;
-  --font-display: 'Fredoka', sans-serif;
-  
-  --color-atelie-pink: #fca5a5;
-  --color-atelie-light: #fdf2f8;
-  --color-atelie-blue: #93c5fd;
-  --color-atelie-green: #bbf7d0;
-  --color-atelie-yellow: #fef08a;
-  --color-atelie-dark: #4c1d95;
-  --color-atelie-text: #44403c;
-  
+  --font-sans: 'Montserrat', sans-serif;
+  --font-display: 'Cormorant Garamond', serif;
+
+  --color-alma-rose: #D8A7B1;
+  --color-alma-light: #F3D8DD;
+  --color-alma-cream: #F7F2EB;
+  --color-alma-sage: #A8B2A1;
+  --color-alma-brown: #8A6F5A;
+  --color-alma-text: #5C4A3C;
+
   --animate-float: float 6s ease-in-out infinite;
   --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  
+
   @keyframes float {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-20px); }
@@ -26,7 +25,7 @@
         border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
         animation: morph 8s ease-in-out infinite;
     }
-    
+
     .typing-cursor::after {
         content: '|';
         animation: blink 1s step-start infinite;
