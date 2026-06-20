@@ -113,9 +113,15 @@ const captureFromCamera = () => {
     if (!videoRef.value) return;
     const video = videoRef.value;
     const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth || 1280; canvas.height = video.videoHeight || 720;
-    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+    const MAX = 800;
+    let w = video.videoWidth || 1280, h = video.videoHeight || 720;
+    if (w > MAX || h > MAX) {
+        if (w > h) { h = Math.round((h * MAX) / w); w = MAX; }
+        else { w = Math.round((w * MAX) / h); h = MAX; }
+    }
+    canvas.width = w; canvas.height = h;
+    canvas.getContext('2d').drawImage(video, 0, 0, w, h);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.72);
     capturedImages.value.push({ preview: dataUrl, base64: dataUrl.split(',')[1] });
     stopCamera(); scannerMode.value = 'review';
 };
@@ -128,7 +134,7 @@ const compressAndReadFile = (file) => new Promise((resolve) => {
         img.src = e.target.result;
         img.onload = () => {
             const canvas = document.createElement('canvas');
-            const MAX = 1280;
+            const MAX = 800;
             let { width, height } = img;
             if (width > MAX || height > MAX) {
                 if (width > height) { height = Math.round((height * MAX) / width); width = MAX; }
@@ -136,7 +142,7 @@ const compressAndReadFile = (file) => new Promise((resolve) => {
             }
             canvas.width = width; canvas.height = height;
             canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.72);
             resolve(dataUrl);
         };
     };
