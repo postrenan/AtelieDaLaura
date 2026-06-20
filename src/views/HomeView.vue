@@ -132,6 +132,9 @@ onUnmounted(() => {
           <div class="hidden md:flex space-x-8" data-aos="fade-down" data-aos-delay="100">
             <a href="#inicio" class="font-semibold text-alma-text hover:text-alma-brown transition-colors">Início</a>
             <a href="#produtos" class="font-semibold text-alma-text hover:text-alma-brown transition-colors">Criações</a>
+            <router-link to="/produtos" class="font-semibold text-alma-text hover:text-alma-brown transition-colors flex items-center gap-1">
+              <ShoppingBagIcon class="w-4 h-4" /> Produtos
+            </router-link>
             <a href="#datas-especiais" class="font-semibold text-alma-brown hover:text-alma-rose transition-colors flex items-center gap-1">
               <HeartIcon class="w-4 h-4 fill-alma-rose text-alma-rose" /> Presentes
             </a>
@@ -156,6 +159,9 @@ onUnmounted(() => {
         <div class="flex flex-col px-4 pt-2 pb-6 space-y-4">
           <a href="#inicio" @click="isMenuOpen = false" class="font-semibold text-alma-text hover:text-alma-brown">Início</a>
           <a href="#produtos" @click="isMenuOpen = false" class="font-semibold text-alma-text hover:text-alma-brown">Criações</a>
+          <router-link to="/produtos" @click="isMenuOpen = false" class="font-semibold text-alma-text hover:text-alma-brown flex items-center gap-2">
+            <ShoppingBagIcon class="w-4 h-4" /> Produtos
+          </router-link>
           <a href="#datas-especiais" @click="isMenuOpen = false" class="font-semibold text-alma-brown flex items-center gap-2">
             <HeartIcon class="w-4 h-4 fill-alma-rose text-alma-rose" /> Presentes Especiais
           </a>

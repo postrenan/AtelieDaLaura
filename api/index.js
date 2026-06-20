@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import pg from 'pg';
 import dotenv from 'dotenv';
+import Groq from 'groq-sdk';
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ app.post('/api/login', (req, res) => {
 app.use('/api', (req, res, next) => {
     if (req.path === '/login') return next();
     if (req.path === '/feedbacks' && req.method === 'GET') return next();
+    if (req.path === '/products' && req.method === 'GET') return next();
 
     const authHeader = req.headers.authorization;
     const validToken = process.env.JWT_SECRET || 'alma-secret-token';
@@ -239,6 +241,101 @@ app.post('/api/feedbacks', async (req, res) => {
         });
     } catch (err) {
         res.status(500).json({ error: err.message });
+    }
+});
+
+// ---- PRODUCTS API ----
+app.get('/api/products', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM products WHERE active = true ORDER BY created_at DESC');
+        res.json(result.rows.map(r => ({ ...r, images: Array.isArray(r.images) ? r.images : [] })));
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get('/api/products/all', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM products ORDER BY created_at DESC');
+        res.json(result.rows.map(r => ({ ...r, images: Array.isArray(r.images) ? r.images : [] })));
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/products', async (req, res) => {
+    const { name, description, price, images, whatsapp_message } = req.body;
+    try {
+        const result = await pool.query(
+            'INSERT INTO products (name, description, price, images, whatsapp_message) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+            [name, description, price, JSON.stringify(images || []), whatsapp_message || '']
+        );
+        const r = result.rows[0];
+        res.status(201).json({ ...r, images: Array.isArray(r.images) ? r.images : [] });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.put('/api/products/:id', async (req, res) => {
+    const { name, description, price, images, whatsapp_message, active } = req.body;
+    try {
+        const result = await pool.query(
+            'UPDATE products SET name=$1, description=$2, price=$3, images=$4, whatsapp_message=$5, active=$6 WHERE id=$7 RETURNING *',
+            [name, description, price, JSON.stringify(images || []), whatsapp_message || '', active, req.params.id]
+        );
+        const r = result.rows[0];
+        res.json({ ...r, images: Array.isArray(r.images) ? r.images : [] });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete('/api/products/:id', async (req, res) => {
+    try {
+        await pool.query('DELETE FROM products WHERE id=$1', [req.params.id]);
+        res.status(204).send();
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ---- AI MATERIAL SCANNER (Groq) ----
+app.post('/api/analyze-material-image', async (req, res) => {
+    const { imageBase64, mediaType } = req.body;
+    if (!imageBase64) return res.status(400).json({ error: 'Imagem não enviada' });
+
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey) return res.status(500).json({ error: 'GROQ_API_KEY não configurada' });
+
+    try {
+        const groq = new Groq({ apiKey });
+        const mimeType = mediaType || 'image/jpeg';
+        const completion = await groq.chat.completions.create({
+            model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+            max_tokens: 512,
+            messages: [{
+                role: 'user',
+                content: [
+                    {
+                        type: 'image_url',
+                        image_url: { url: `data:${mimeType};base64,${imageBase64}` }
+                    },
+                    {
+                        type: 'text',
+                        text: 'Analise esta imagem de novelo/fio de crochê ou tricô. Extraia os dados da embalagem e retorne SOMENTE um JSON válido sem markdown: {"name": "nome do fio com cor e marca", "cost": null, "unit": "metros ou gramas ou novelo", "quantity": quantidade_numerica}. Para "unit": use "metros" se houver metragem, "gramas" se só gramagem, "novelo" se nenhum. Para "cost" sempre use null (usuário vai preencher). Para "quantity" use 1 se não encontrar. Responda APENAS com o JSON, sem texto extra.'
+                    }
+                ]
+            }]
+        });
+
+        const text = completion.choices[0].message.content.trim();
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        const data = JSON.parse(jsonMatch ? jsonMatch[0] : text);
+        res.json(data);
+    } catch (err) {
+        console.error('Error analyzing image:', err);
+        res.status(500).json({ error: 'Erro ao analisar imagem: ' + err.message });
     }
 });
 

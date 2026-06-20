@@ -3,8 +3,9 @@ import { createRouter, createWebHistory } from 'vue-router';
 const routes = [
   { path: '/', component: () => import('./views/HomeView.vue') },
   { path: '/login', component: () => import('./views/LoginView.vue') },
-  { 
-    path: '/admin', 
+  { path: '/produtos', component: () => import('./views/ProductsView.vue') },
+  {
+    path: '/admin',
     component: () => import('./views/AdminView.vue'),
     meta: { requiresAuth: true },
     children: [
@@ -16,7 +17,8 @@ const routes = [
       { path: 'stock', component: () => import('./components/admin/Stock.vue') },
       { path: 'calculator', component: () => import('./components/admin/Calculator.vue') },
       { path: 'orders', component: () => import('./components/admin/Orders.vue') },
-      { path: 'feedbacks', component: () => import('./components/admin/Feedbacks.vue') }
+      { path: 'feedbacks', component: () => import('./components/admin/Feedbacks.vue') },
+      { path: 'products', component: () => import('./components/admin/Products.vue') }
     ]
   }
 ];
