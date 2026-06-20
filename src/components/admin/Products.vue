@@ -27,31 +27,35 @@ const fetchProducts = async () => {
     }
 };
 
-const uploadToCloudinary = async (file) => {
-    const cloud = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-    const preset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
-    if (!cloud || !preset) {
-        alert('Configure VITE_CLOUDINARY_CLOUD_NAME e VITE_CLOUDINARY_UPLOAD_PRESET no arquivo .env');
-        return null;
-    }
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', preset);
-    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloud}/image/upload`, {
-        method: 'POST',
-        body: formData
-    });
-    const data = await res.json();
-    return data.secure_url || null;
-};
+const compressToBase64 = (file) => new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (e) => {
+        const img = new Image();
+        img.src = e.target.result;
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const MAX = 900;
+            let { width, height } = img;
+            if (width > MAX || height > MAX) {
+                if (width > height) { height = Math.round((height * MAX) / width); width = MAX; }
+                else { width = Math.round((width * MAX) / height); height = MAX; }
+            }
+            canvas.width = width;
+            canvas.height = height;
+            canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', 0.78));
+        };
+    };
+});
 
 const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
     isUploading.value = true;
     for (const file of files) {
-        const url = await uploadToCloudinary(file);
-        if (url) newProduct.value.images.push(url);
+        const dataUrl = await compressToBase64(file);
+        newProduct.value.images.push(dataUrl);
     }
     isUploading.value = false;
     e.target.value = '';
@@ -168,12 +172,12 @@ onMounted(fetchProducts);
                 <label class="flex items-center gap-3 border-2 border-dashed border-gray-200 rounded-xl p-4 cursor-pointer hover:border-rose-300 hover:bg-rose-50 transition-colors">
                     <Upload class="w-5 h-5 text-gray-400" />
                     <span class="text-sm text-gray-500">
-                        <span v-if="isUploading" class="text-rose-500 font-medium">Enviando fotos...</span>
+                        <span v-if="isUploading" class="text-rose-500 font-medium">Comprimindo fotos...</span>
                         <span v-else>Clique para adicionar fotos <span class="text-xs text-gray-400">(várias de uma vez)</span></span>
                     </span>
                     <input type="file" multiple accept="image/*" class="hidden" @change="handleImageUpload" :disabled="isUploading" />
                 </label>
-                <p class="text-xs text-gray-400 mt-1">Requer VITE_CLOUDINARY_CLOUD_NAME e VITE_CLOUDINARY_UPLOAD_PRESET no .env</p>
+                <p class="text-xs text-gray-400 mt-1">As fotos são comprimidas automaticamente e salvas no banco de dados.</p>
 
                 <div v-if="newProduct.images.length > 0" class="flex flex-wrap gap-3 mt-3">
                     <div v-for="(img, i) in newProduct.images" :key="i" class="relative group">

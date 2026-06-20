@@ -363,28 +363,30 @@ app.delete('/api/products/:id', async (req, res) => {
 
 // ---- AI MATERIAL SCANNER (Groq) ----
 app.post('/api/analyze-material-image', async (req, res) => {
-    const { imageBase64, mediaType } = req.body;
-    if (!imageBase64) return res.status(400).json({ error: 'Imagem não enviada' });
+    const { images } = req.body;
+    if (!images || !images.length) return res.status(400).json({ error: 'Nenhuma imagem enviada' });
 
     const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) return res.status(500).json({ error: 'GROQ_API_KEY não configurada' });
 
     try {
         const groq = new Groq({ apiKey });
-        const mimeType = mediaType || 'image/jpeg';
+
+        const imageContents = images.map(img => ({
+            type: 'image_url',
+            image_url: { url: `data:${img.mediaType || 'image/jpeg'};base64,${img.base64}` }
+        }));
+
         const completion = await groq.chat.completions.create({
             model: 'meta-llama/llama-4-scout-17b-16e-instruct',
             max_tokens: 512,
             messages: [{
                 role: 'user',
                 content: [
-                    {
-                        type: 'image_url',
-                        image_url: { url: `data:${mimeType};base64,${imageBase64}` }
-                    },
+                    ...imageContents,
                     {
                         type: 'text',
-                        text: 'Analise esta imagem de novelo/fio de crochê ou tricô. Extraia os dados da embalagem e retorne SOMENTE um JSON válido sem markdown: {"name": "nome do fio com cor e marca", "cost": null, "unit": "metros ou gramas ou novelo", "quantity": quantidade_numerica}. Para "unit": use "metros" se houver metragem, "gramas" se só gramagem, "novelo" se nenhum. Para "cost" sempre use null (usuário vai preencher). Para "quantity" use 1 se não encontrar. Responda APENAS com o JSON, sem texto extra.'
+                        text: `Analise ${images.length > 1 ? 'estas ' + images.length + ' imagens do mesmo novelo/fio (frente, verso e laterais da embalagem)' : 'esta imagem de novelo/fio'}. Use todas as fotos juntas para extrair as informações mais completas possíveis. Retorne SOMENTE um JSON válido sem markdown: {"name": "nome completo do fio com cor e marca", "cost": null, "unit": "metros ou gramas ou novelo", "quantity": quantidade_numerica}. Para "unit": prefira "metros" se houver metragem visível em qualquer foto, "gramas" se só gramagem, "novelo" se nenhum. Para "cost" use sempre null. Para "quantity" use 1 se não encontrar. Responda APENAS com o JSON.`
                     }
                 ]
             }]

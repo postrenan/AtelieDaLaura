@@ -7,10 +7,9 @@ const newMaterial = ref({ name: '', cost: 0, unit: 'novelo', quantity: 1 });
 const editingId = ref(null);
 const editForm = ref({});
 
-// scanner states: 'closed' | 'idle' | 'camera' | 'preview' | 'loading'
+// scanner states: 'closed' | 'idle' | 'camera' | 'review' | 'loading'
 const scannerMode = ref('closed');
-const capturedPreview = ref(null);
-const capturedBase64 = ref(null);
+const capturedImages = ref([]); // [{ preview, base64 }]
 const cameraError = ref('');
 const videoRef = ref(null);
 let activeStream = null;
@@ -85,17 +84,18 @@ const stopCamera = () => {
 };
 
 const openScanner = () => {
-    capturedPreview.value = null; capturedBase64.value = null; cameraError.value = '';
+    capturedImages.value = []; cameraError.value = '';
     scannerMode.value = 'idle';
 };
 
 const closeScanner = () => {
     stopCamera(); scannerMode.value = 'closed';
-    capturedPreview.value = null; capturedBase64.value = null;
+    capturedImages.value = [];
 };
 
 const startCamera = async () => {
-    cameraError.value = ''; scannerMode.value = 'camera';
+    cameraError.value = '';
+    scannerMode.value = 'camera';
     await new Promise(r => setTimeout(r, 80));
     try {
         activeStream = await navigator.mediaDevices.getUserMedia({
@@ -104,7 +104,7 @@ const startCamera = async () => {
         if (videoRef.value) videoRef.value.srcObject = activeStream;
     } catch (err) {
         cameraError.value = 'Não foi possível acessar a câmera. Verifique as permissões do navegador.';
-        scannerMode.value = 'idle';
+        scannerMode.value = capturedImages.value.length ? 'review' : 'idle';
         console.error('Camera error:', err);
     }
 };
@@ -116,8 +116,8 @@ const captureFromCamera = () => {
     canvas.width = video.videoWidth || 1280; canvas.height = video.videoHeight || 720;
     canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
     const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-    capturedPreview.value = dataUrl; capturedBase64.value = dataUrl.split(',')[1];
-    stopCamera(); scannerMode.value = 'preview';
+    capturedImages.value.push({ preview: dataUrl, base64: dataUrl.split(',')[1] });
+    stopCamera(); scannerMode.value = 'review';
 };
 
 const compressAndReadFile = (file) => new Promise((resolve) => {
@@ -142,28 +142,53 @@ const compressAndReadFile = (file) => new Promise((resolve) => {
     };
 });
 
-const handleGalleryFile = async (e) => {
-    const file = e.target.files[0]; if (!file) return;
-    const dataUrl = await compressAndReadFile(file);
-    capturedPreview.value = dataUrl; capturedBase64.value = dataUrl.split(',')[1];
-    scannerMode.value = 'preview'; e.target.value = '';
+const handleGalleryFiles = async (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    for (const file of files) {
+        const dataUrl = await compressAndReadFile(file);
+        capturedImages.value.push({ preview: dataUrl, base64: dataUrl.split(',')[1] });
+    }
+    scannerMode.value = 'review';
+    e.target.value = '';
 };
 
-const retakePhoto = () => { capturedPreview.value = null; capturedBase64.value = null; scannerMode.value = 'idle'; };
+const removeCapture = (index) => {
+    capturedImages.value.splice(index, 1);
+    if (capturedImages.value.length === 0) scannerMode.value = 'idle';
+};
 
-const analyzeImage = async () => {
-    if (!capturedBase64.value) return;
+const addMoreCamera = async () => {
+    cameraError.value = '';
+    scannerMode.value = 'camera';
+    await new Promise(r => setTimeout(r, 80));
+    try {
+        activeStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }
+        });
+        if (videoRef.value) videoRef.value.srcObject = activeStream;
+    } catch (err) {
+        cameraError.value = 'Não foi possível acessar a câmera.';
+        scannerMode.value = 'review';
+        console.error('Camera error:', err);
+    }
+};
+
+const analyzeImages = async () => {
+    if (!capturedImages.value.length) return;
     scannerMode.value = 'loading';
     try {
         const res = await fetch('/api/analyze-material-image', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('alma_token') },
-            body: JSON.stringify({ imageBase64: capturedBase64.value, mediaType: 'image/jpeg' })
+            body: JSON.stringify({
+                images: capturedImages.value.map(img => ({ base64: img.base64, mediaType: 'image/jpeg' }))
+            })
         });
         if (!res.ok) {
             const err = await res.json();
             alert('Erro ao analisar: ' + (err.error || 'Tente novamente'));
-            scannerMode.value = 'preview'; return;
+            scannerMode.value = 'review'; return;
         }
         const data = await res.json();
         if (data.name) newMaterial.value.name = data.name;
@@ -174,7 +199,7 @@ const analyzeImage = async () => {
     } catch (err) {
         console.error('Error analyzing image:', err);
         alert('Erro ao analisar. Verifique se GROQ_API_KEY está configurada.');
-        scannerMode.value = 'preview';
+        scannerMode.value = 'review';
     }
 };
 
@@ -209,8 +234,10 @@ onUnmounted(stopCamera);
                         </button>
                     </div>
 
+                    <!-- idle: choose source -->
                     <div v-if="scannerMode === 'idle'" class="p-5">
-                        <p class="text-sm text-violet-700 mb-4 text-center">Aponte a câmera para a embalagem do novelo. A IA vai ler o nome, metragem e gramagem automaticamente.</p>
+                        <p class="text-sm text-violet-700 mb-1 text-center">Tire fotos da embalagem do novelo — frente, verso, lateral.</p>
+                        <p class="text-xs text-violet-500 mb-4 text-center">Quanto mais fotos, mais informações a IA consegue ler.</p>
                         <p v-if="cameraError" class="text-xs text-red-500 mb-3 text-center bg-red-50 rounded-lg p-2">{{ cameraError }}</p>
                         <div class="flex flex-col sm:flex-row gap-3">
                             <button @click="startCamera" class="flex-1 flex items-center justify-center gap-2 bg-violet-500 hover:bg-violet-600 text-white font-bold py-3 px-4 rounded-xl transition-colors">
@@ -218,11 +245,12 @@ onUnmounted(stopCamera);
                             </button>
                             <label class="flex-1 flex items-center justify-center gap-2 bg-white hover:bg-violet-50 text-violet-700 font-bold py-3 px-4 rounded-xl border-2 border-violet-200 cursor-pointer transition-colors">
                                 <Image class="w-5 h-5" /> Escolher da Galeria
-                                <input type="file" accept="image/*" class="hidden" @change="handleGalleryFile" />
+                                <input type="file" accept="image/*" multiple class="hidden" @change="handleGalleryFiles" />
                             </label>
                         </div>
                     </div>
 
+                    <!-- camera: live view -->
                     <div v-if="scannerMode === 'camera'" class="flex flex-col">
                         <div class="relative bg-black">
                             <video ref="videoRef" autoplay playsinline muted class="w-full max-h-72 object-cover"></video>
@@ -234,12 +262,18 @@ onUnmounted(stopCamera);
                                     <span class="absolute -bottom-0.5 -right-0.5 w-4 h-4 border-b-2 border-r-2 border-white rounded-br-lg"></span>
                                 </div>
                             </div>
+                            <div v-if="capturedImages.length > 0" class="absolute top-2 left-2 bg-violet-600 text-white text-xs font-bold px-2 py-1 rounded-full">
+                                {{ capturedImages.length }} foto{{ capturedImages.length > 1 ? 's' : '' }}
+                            </div>
                         </div>
                         <div class="p-4 flex flex-col sm:flex-row gap-3 items-center">
-                            <p class="text-xs text-violet-600 flex-1 text-center sm:text-left">Centralize a etiqueta do novelo no enquadramento e capture.</p>
+                            <p class="text-xs text-violet-600 flex-1 text-center sm:text-left">
+                                Capture quantas fotos precisar (frente, verso, lateral).
+                            </p>
                             <div class="flex gap-3">
-                                <button @click="scannerMode = 'idle'; stopCamera()" class="flex items-center gap-1.5 text-sm text-violet-500 hover:text-violet-700 font-medium px-3 py-2 rounded-lg hover:bg-violet-100 transition-colors">
-                                    <RotateCcw class="w-4 h-4" /> Voltar
+                                <button @click="() => { stopCamera(); scannerMode = capturedImages.length ? 'review' : 'idle'; }"
+                                    class="flex items-center gap-1.5 text-sm text-violet-500 hover:text-violet-700 font-medium px-3 py-2 rounded-lg hover:bg-violet-100 transition-colors">
+                                    <RotateCcw class="w-4 h-4" /> {{ capturedImages.length ? 'Ver fotos' : 'Voltar' }}
                                 </button>
                                 <button @click="captureFromCamera" class="flex items-center gap-2 bg-violet-500 hover:bg-violet-600 text-white font-bold py-2 px-5 rounded-xl transition-colors shadow-sm">
                                     <Camera class="w-4 h-4" /> Capturar
@@ -248,23 +282,49 @@ onUnmounted(stopCamera);
                         </div>
                     </div>
 
-                    <div v-if="scannerMode === 'preview'" class="p-5">
-                        <div class="flex justify-center mb-4">
-                            <img :src="capturedPreview" alt="Foto capturada do novelo" class="max-h-52 rounded-xl border-2 border-violet-200 object-contain shadow-sm" />
+                    <!-- review: show all captures, add more or analyze -->
+                    <div v-if="scannerMode === 'review'" class="p-5 space-y-4">
+                        <div>
+                            <p class="text-sm font-medium text-violet-800 mb-2">
+                                {{ capturedImages.length }} foto{{ capturedImages.length > 1 ? 's' : '' }} capturada{{ capturedImages.length > 1 ? 's' : '' }}
+                                <span class="text-violet-500 font-normal">— adicione mais se necessário</span>
+                            </p>
+                            <div class="flex flex-wrap gap-2">
+                                <div v-for="(img, i) in capturedImages" :key="i" class="relative group">
+                                    <img :src="img.preview" :alt="`Foto ${i + 1}`"
+                                        class="w-20 h-20 object-cover rounded-lg border-2 border-violet-200 shadow-sm" />
+                                    <button @click="removeCapture(i)"
+                                        class="absolute -top-1.5 -right-1.5 bg-red-500 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow">
+                                        <X class="w-3 h-3" />
+                                    </button>
+                                    <span class="absolute bottom-1 left-1 bg-black/50 text-white text-[10px] px-1 rounded">{{ i + 1 }}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="flex gap-3">
-                            <button @click="retakePhoto" class="flex-1 flex items-center justify-center gap-2 bg-white hover:bg-violet-50 text-violet-700 font-bold py-2.5 px-4 rounded-xl border-2 border-violet-200 transition-colors text-sm">
-                                <RotateCcw class="w-4 h-4" /> Tirar outra
+
+                        <!-- add more buttons -->
+                        <div class="flex gap-2">
+                            <button @click="addMoreCamera"
+                                class="flex items-center gap-1.5 text-xs text-violet-600 hover:text-violet-800 font-medium px-3 py-2 rounded-lg border border-violet-200 hover:bg-violet-50 transition-colors">
+                                <Camera class="w-3.5 h-3.5" /> + Câmera
                             </button>
-                            <button @click="analyzeImage" class="flex-1 flex items-center justify-center gap-2 bg-violet-500 hover:bg-violet-600 text-white font-bold py-2.5 px-4 rounded-xl transition-colors shadow-sm text-sm">
-                                <Zap class="w-4 h-4" /> Analisar com IA
-                            </button>
+                            <label class="flex items-center gap-1.5 text-xs text-violet-600 hover:text-violet-800 font-medium px-3 py-2 rounded-lg border border-violet-200 hover:bg-violet-50 cursor-pointer transition-colors">
+                                <Image class="w-3.5 h-3.5" /> + Galeria
+                                <input type="file" accept="image/*" multiple class="hidden" @change="handleGalleryFiles" />
+                            </label>
                         </div>
+
+                        <button @click="analyzeImages"
+                            class="w-full flex items-center justify-center gap-2 bg-violet-500 hover:bg-violet-600 text-white font-bold py-3 rounded-xl transition-colors shadow-sm">
+                            <Zap class="w-4 h-4" />
+                            Analisar {{ capturedImages.length }} foto{{ capturedImages.length > 1 ? 's' : '' }} com IA
+                        </button>
                     </div>
 
+                    <!-- loading -->
                     <div v-if="scannerMode === 'loading'" class="flex flex-col items-center justify-center gap-3 py-10">
                         <Loader class="w-8 h-8 text-violet-500 animate-spin" />
-                        <p class="text-sm font-medium text-violet-700">Lendo a embalagem com IA...</p>
+                        <p class="text-sm font-medium text-violet-700">Analisando {{ capturedImages.length }} foto{{ capturedImages.length > 1 ? 's' : '' }} com IA...</p>
                         <p class="text-xs text-violet-400">Isso pode levar alguns segundos</p>
                     </div>
                 </div>
