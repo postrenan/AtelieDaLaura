@@ -13,8 +13,9 @@ const newOrder = ref({
 
 const fetchOrders = async () => {
     try {
-        const res = await fetch('/api/orders', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('atelie_token') } });
-        orders.value = await res.json();
+        const res = await fetch('/api/orders', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('alma_token') } });
+        const data = await res.json();
+        orders.value = Array.isArray(data) ? data : [];
     } catch (e) {
         console.error("Error fetching orders", e);
     }
@@ -24,7 +25,7 @@ const addOrder = async () => {
     try {
         const res = await fetch('/api/orders', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('atelie_token') },
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('alma_token') },
             body: JSON.stringify(newOrder.value)
         });
         const savedOrder = await res.json();

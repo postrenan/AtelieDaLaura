@@ -11,8 +11,9 @@ const newEntry = ref({
 
 const fetchFinances = async () => {
     try {
-        const res = await fetch('/api/finances', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('atelie_token') } });
-        entries.value = await res.json();
+        const res = await fetch('/api/finances', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('alma_token') } });
+        const data = await res.json();
+        entries.value = Array.isArray(data) ? data : [];
     } catch (e) {
         console.error("Error fetching finances", e);
     }
@@ -22,7 +23,7 @@ const addEntry = async () => {
     try {
         const res = await fetch('/api/finances', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('atelie_token') },
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('alma_token') },
             body: JSON.stringify(newEntry.value)
         });
         const savedEntry = await res.json();

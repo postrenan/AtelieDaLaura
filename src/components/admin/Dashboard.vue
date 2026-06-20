@@ -10,16 +10,17 @@ const materials = ref([]);
 const fetchData = async () => {
     try {
         const [finRes, ordRes, prodRes, matRes] = await Promise.all([
-            fetch('/api/finances', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('atelie_token') } }),
-            fetch('/api/orders', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('atelie_token') } }),
-            fetch('/api/production_logs', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('atelie_token') } }),
-            fetch('/api/materials', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('atelie_token') } })
+            fetch('/api/finances', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('alma_token') } }),
+            fetch('/api/orders', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('alma_token') } }),
+            fetch('/api/production_logs', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('alma_token') } }),
+            fetch('/api/materials', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('alma_token') } })
         ]);
         
-        finances.value = await finRes.json();
-        orders.value = await ordRes.json();
-        productionLogs.value = await prodRes.json();
-        materials.value = await matRes.json();
+        const [fin, ord, prod, mat] = await Promise.all([finRes.json(), ordRes.json(), prodRes.json(), matRes.json()]);
+        finances.value = Array.isArray(fin) ? fin : [];
+        orders.value = Array.isArray(ord) ? ord : [];
+        productionLogs.value = Array.isArray(prod) ? prod : [];
+        materials.value = Array.isArray(mat) ? mat : [];
     } catch (e) {
         console.error("Error fetching dashboard data", e);
     }

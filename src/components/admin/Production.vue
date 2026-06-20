@@ -11,8 +11,9 @@ const newMaterial = ref({
 
 const fetchMaterials = async () => {
     try {
-        const res = await fetch('/api/materials', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('atelie_token') } });
-        materials.value = await res.json();
+        const res = await fetch('/api/materials', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('alma_token') } });
+        const data = await res.json();
+        materials.value = Array.isArray(data) ? data : [];
     } catch (e) {
         console.error("Error fetching materials", e);
     }
@@ -22,7 +23,7 @@ const addMaterial = async () => {
     try {
         const res = await fetch('/api/materials', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('atelie_token') },
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('alma_token') },
             body: JSON.stringify(newMaterial.value)
         });
         const savedMaterial = await res.json();

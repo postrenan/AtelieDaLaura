@@ -10,8 +10,9 @@ const newFeedback = ref({
 
 const fetchFeedbacks = async () => {
     try {
-        const res = await fetch('/api/feedbacks', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('atelie_token') } });
-        feedbacks.value = await res.json();
+        const res = await fetch('/api/feedbacks', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('alma_token') } });
+        const data = await res.json();
+        feedbacks.value = Array.isArray(data) ? data : [];
     } catch (e) {
         console.error("Error fetching feedbacks", e);
     }
@@ -21,7 +22,7 @@ const addFeedback = async () => {
     try {
         const res = await fetch('/api/feedbacks', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('atelie_token') },
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('alma_token') },
             body: JSON.stringify(newFeedback.value)
         });
         const savedFeedback = await res.json();

@@ -11,8 +11,9 @@ const newItem = ref({
 
 const fetchStock = async () => {
     try {
-        const res = await fetch('/api/stock', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('atelie_token') } });
-        stock.value = await res.json();
+        const res = await fetch('/api/stock', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('alma_token') } });
+        const data = await res.json();
+        stock.value = Array.isArray(data) ? data : [];
     } catch (e) {
         console.error("Error fetching stock", e);
     }
@@ -22,7 +23,7 @@ const addItem = async () => {
     try {
         const res = await fetch('/api/stock', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('atelie_token') },
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('alma_token') },
             body: JSON.stringify(newItem.value)
         });
         const savedItem = await res.json();

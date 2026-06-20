@@ -29,7 +29,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth) {
     const token = localStorage.getItem('alma_token');
-    if (token === process.env.JWT_SECRET || token) {
+    if (token) {
       next();
     } else {
       next('/login');

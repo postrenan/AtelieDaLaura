@@ -17,13 +17,14 @@ const currentMaterial = ref({ materialId: '', quantityUsed: 0 });
 const fetchData = async () => {
     try {
         const [matRes, ordRes, logRes] = await Promise.all([
-            fetch('/api/materials', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('atelie_token') } }),
-            fetch('/api/orders', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('atelie_token') } }),
-            fetch('/api/production_logs', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('atelie_token') } })
+            fetch('/api/materials', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('alma_token') } }),
+            fetch('/api/orders', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('alma_token') } }),
+            fetch('/api/production_logs', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('alma_token') } })
         ]);
-        materials.value = await matRes.json();
-        orders.value = await ordRes.json();
-        productionLogs.value = await logRes.json();
+        const [mat, ord, log] = await Promise.all([matRes.json(), ordRes.json(), logRes.json()]);
+        materials.value = Array.isArray(mat) ? mat : [];
+        orders.value = Array.isArray(ord) ? ord : [];
+        productionLogs.value = Array.isArray(log) ? log : [];
     } catch (e) {
         console.error("Error fetching data", e);
     }
@@ -44,7 +45,7 @@ const submitLog = async () => {
     try {
         const res = await fetch('/api/production_logs', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('atelie_token') },
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('alma_token') },
             body: JSON.stringify(newLog.value)
         });
         const savedLog = await res.json();
@@ -60,8 +61,9 @@ const submitLog = async () => {
         newLog.value = { pieceName: '', hoursSpent: 0, linkedOrderId: '', materialsUsed: [] };
         
         // Re-fetch materials to update inventory
-        const matRes = await fetch('/api/materials', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('atelie_token') } });
-        materials.value = await matRes.json();
+        const matRes = await fetch('/api/materials', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('alma_token') } });
+        const matData = await matRes.json();
+        materials.value = Array.isArray(matData) ? matData : [];
     } catch (e) {
         console.error("Error submitting log", e);
     }
